@@ -30,26 +30,24 @@ void MainGameState::init()
 
     // Inicializar Lava
     lava.vy = 30.0f;
-    Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 300};
+    Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 1000};
     lava.rect = lavaRect;
 
     // Inicializar puntuación
     puntuacion = 0.0f;
 
-    Estructura estructura;
-    estructura.rect.x = 0;
-    estructura.rect.y = -40;
-    estructura.rect.width = GetScreenWidth();
-    estructura.rect.height = 40;
-    estructuras.push_back(estructura);
+    // Generación de estructuras
+    generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50); // Suelo inicial
+    generarEstructura(estructuras, 0, -1000, 80, 1000); // Pared izquierda
+    generarEstructura(estructuras, GetScreenWidth()-80, -1000, 80, 1000); // Pared derecha
 
-    estructura.rect.x = 200;
-    estructura.rect.y = -150;
-    estructura.rect.width = 200;
-    estructura.rect.height = 20;
-    estructuras.push_back(estructura);
+    generarEstructura(estructuras, 150, -200, 100, 20);
+    generarEstructura(estructuras, 350, -350, 100, 20);
+    generarEstructura(estructuras, 600, -500, 100, 20);
+    generarEstructura(estructuras, 200, -650, 100, 20);
 }
 
+// No se usa, usar el de abajo (con deltaTime)
 void MainGameState::handleInput(){
 }
 
@@ -74,6 +72,67 @@ void MainGameState::update(float deltaTime)
     const int gravedad = 1000;
     puntuacion += deltaTime;
 
+    // Gestión de colisiones
+    bool enSuelo = gestionarColisiones(estructuras, player);
+
+    if(!enSuelo){
+        player.vy += gravedad * deltaTime;
+        player.y += player.vy * deltaTime;
+    }
+
+    // Actualizar bounding box del jugador
+    player.boundingBox.x = player.x - player.width/2;
+    player.boundingBox.y = player.y - player.height/2;
+
+    // Actualizar cámara
+    if(player.y < -GetScreenHeight()*0.40f){
+        camera.target = { GetScreenWidth()/2.0f, player.y };
+    }
+    else{
+        camera.target = { GetScreenWidth()/2.0f, -GetScreenHeight()*0.40f };
+    }
+
+    // Actualizar lava
+    lava.rect.y -= lava.vy * deltaTime;
+    if(CheckCollisionRecs(player.boundingBox, lava.rect)){
+        auto gameOverState = std::make_unique<GameOverState>();
+        gameOverState->setStateMachine(state_machine);
+        gameOverState->setPuntuacion(puntuacion);
+        state_machine->add_state(std::move(gameOverState), true);
+    }
+}
+
+void MainGameState::render()
+{
+    BeginDrawing();
+        ClearBackground(DARKGRAY);
+        BeginMode2D(camera);
+
+            // Jugador
+            DrawRectangleRec(player.boundingBox, RED);
+
+            // Estructura
+            for(auto& estructura : estructuras) {
+                DrawRectangleRec(estructura.rect, LIGHTGRAY);
+            }
+
+            // Lava
+            DrawRectangleRec(lava.rect, ORANGE);
+        
+        EndMode2D();
+    EndDrawing();
+}
+
+void generarEstructura(std::deque<Estructura>& estructuras, float x, float y, float width, float height) {
+    Estructura estructura;
+    estructura.rect.x = x;
+    estructura.rect.y = y;
+    estructura.rect.width = width;
+    estructura.rect.height = height;
+    estructuras.push_back(estructura);
+}
+
+bool gestionarColisiones(std::deque<Estructura>& estructuras, Player& player) {
     bool enSuelo = false;
     for(auto& estructura : estructuras) {
         if (CheckCollisionRecs(player.boundingBox, estructura.rect)) {
@@ -108,45 +167,5 @@ void MainGameState::update(float deltaTime)
             }
         }
     }
-
-    if(!enSuelo){
-        player.vy += gravedad * deltaTime;
-        player.y += player.vy * deltaTime;
-    }
-
-    player.boundingBox.x = player.x - player.width/2;
-    player.boundingBox.y = player.y - player.height/2;
-
-    if(player.y < -GetScreenHeight()*0.40f){
-        camera.target = { GetScreenWidth()/2.0f, player.y };
-    }
-    else{
-        camera.target = { GetScreenWidth()/2.0f, -GetScreenHeight()*0.40f };
-    }
-
-    lava.rect.y -= lava.vy * deltaTime;
-    if(CheckCollisionRecs(player.boundingBox, lava.rect)){
-        auto gameOverState = std::make_unique<GameOverState>();
-        gameOverState->setStateMachine(state_machine);
-        gameOverState->setPuntuacion(puntuacion);
-        state_machine->add_state(std::move(gameOverState), true);
-    }
-}
-
-void MainGameState::render()
-{
-    BeginDrawing();
-        ClearBackground(DARKGRAY);
-        BeginMode2D(camera);
-
-            DrawRectangleRec(player.boundingBox, RED);
-
-            for(auto& estructura : estructuras) {
-                DrawRectangleRec(estructura.rect, LIGHTGRAY);
-            }
-
-            DrawRectangleRec(lava.rect, ORANGE);
-        
-        EndMode2D();
-    EndDrawing();
+    return enSuelo;
 }
