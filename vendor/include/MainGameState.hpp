@@ -1,5 +1,6 @@
 #pragma once
 #include <GameState.hpp>
+#include <StateMachine.hpp>
 #include <deque>
 
 extern "C" {
@@ -40,7 +41,6 @@ class MainGameState : public GameState
 
         void pause(){};
         void resume(){};
-
     
     private:
         char entered_key;

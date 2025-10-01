@@ -1,5 +1,6 @@
 #include <MainGameState.hpp>
 #include <iostream>
+#include <GameOverState.hpp>
 
 MainGameState::MainGameState()
 {
@@ -115,7 +116,10 @@ void MainGameState::update(float deltaTime)
 
     lava.rect.y -= lava.vy * deltaTime;
     if(CheckCollisionRecs(player.boundingBox, lava.rect)){
-        std::cout << "Colisión con lava" << std::endl;
+        auto gameOverState = std::make_unique<GameOverState>();
+        gameOverState->setStateMachine(state_machine);
+        //gameOverState->setPuntuacion(0); // En un futuro, pasar tiempo de partida
+        state_machine->add_state(std::move(gameOverState), true);
     }
 }
 
