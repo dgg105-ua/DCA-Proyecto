@@ -1,15 +1,11 @@
 #pragma once
 #include <GameState.hpp>
 
-extern "C" {
-    #include <raylib.h>
-}
-
-class MainGameState : public GameState
+class MainMenuState : public GameState
 {
     public:
-        MainGameState();
-        ~MainGameState() = default;
+        MainMenuState();
+        ~MainMenuState() = default;
 
         void init() override;
         void handleInput() override;
@@ -19,7 +15,8 @@ class MainGameState : public GameState
         void pause(){};
         void resume(){};
 
-    
+        void loadBackground();
+
     private:
         char entered_key;
 };
