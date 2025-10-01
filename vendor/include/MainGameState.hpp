@@ -35,4 +35,5 @@ class MainGameState : public GameState
         char entered_key;
 
         Player player;
+        Camera2D camera;
 };
