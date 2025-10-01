@@ -21,6 +21,11 @@ struct Estructura{
     Rectangle rect;
 };
 
+struct Lava{
+    Rectangle rect;
+    float vy;
+}; 
+
 class MainGameState : public GameState
 {
     public:
@@ -44,4 +49,5 @@ class MainGameState : public GameState
         Camera2D camera;
 
         std::deque<Estructura> estructuras; // Estructuras en el juego
+        Lava lava;
 };

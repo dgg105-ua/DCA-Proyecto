@@ -22,6 +22,10 @@ void MainGameState::init()
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
+    lava.vy = 20.0f;
+    Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 300};
+    lava.rect = lavaRect;
+
     Estructura estructura;
     estructura.rect.x = 0;
     estructura.rect.y = -40;
@@ -108,6 +112,11 @@ void MainGameState::update(float deltaTime)
     else{
         camera.target = { GetScreenWidth()/2.0f, -GetScreenHeight()*0.40f };
     }
+
+    lava.rect.y -= lava.vy * deltaTime;
+    if(CheckCollisionRecs(player.boundingBox, lava.rect)){
+        std::cout << "Colisión con lava" << std::endl;
+    }
 }
 
 void MainGameState::render()
@@ -121,6 +130,8 @@ void MainGameState::render()
             for(auto& estructura : estructuras) {
                 DrawRectangleRec(estructura.rect, LIGHTGRAY);
             }
+
+            DrawRectangleRec(lava.rect, ORANGE);
         
         EndMode2D();
     EndDrawing();
