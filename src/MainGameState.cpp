@@ -6,8 +6,12 @@ MainGameState::MainGameState()
 {
 }
 
+void generarEstructura(std::deque<Estructura>& estructuras, float x, float y, float width, float height);
+bool gestionarColisiones(std::deque<Estructura>& estructuras, Player& player);
+
 void MainGameState::init()
 {
+    // Inicializar Jugador
     player.x = GetScreenWidth() / 2;
     player.y = -100;
     player.vx = 350.0f;
@@ -18,14 +22,19 @@ void MainGameState::init()
     Rectangle boundingBox = {player.x - player.width/2, player.y - player.height/2, player.width, player.height};
     player.boundingBox = boundingBox;
 
+    // Inicializar Cámara
     camera.target = { GetScreenWidth()/2.0f, player.y };
     camera.offset = { GetScreenWidth()/2.0f, GetScreenHeight()*0.60f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    lava.vy = 20.0f;
+    // Inicializar Lava
+    lava.vy = 30.0f;
     Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 300};
     lava.rect = lavaRect;
+
+    // Inicializar puntuación
+    puntuacion = 0.0f;
 
     Estructura estructura;
     estructura.rect.x = 0;
@@ -53,7 +62,7 @@ void MainGameState::handleInput(float deltaTime)
         if(player.x < GetScreenWidth()) player.x += player.vx * deltaTime;
     }
     if (IsKeyDown(KEY_SPACE) && player.canJump){
-        player.vy = -500;
+        player.vy = -600;
         player.canJump = false;
     }
 }
@@ -63,6 +72,7 @@ void MainGameState::update(float deltaTime)
     handleInput(deltaTime);
 
     const int gravedad = 1000;
+    puntuacion += deltaTime;
 
     bool enSuelo = false;
     for(auto& estructura : estructuras) {
@@ -118,7 +128,7 @@ void MainGameState::update(float deltaTime)
     if(CheckCollisionRecs(player.boundingBox, lava.rect)){
         auto gameOverState = std::make_unique<GameOverState>();
         gameOverState->setStateMachine(state_machine);
-        //gameOverState->setPuntuacion(0); // En un futuro, pasar tiempo de partida
+        gameOverState->setPuntuacion(puntuacion);
         state_machine->add_state(std::move(gameOverState), true);
     }
 }

@@ -47,6 +47,7 @@ class MainGameState : public GameState
 
         Player player;
         Camera2D camera;
+        float puntuacion = 0.0f;
 
         std::deque<Estructura> estructuras; // Estructuras en el juego
         Lava lava;

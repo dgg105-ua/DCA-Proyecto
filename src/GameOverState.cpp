@@ -28,5 +28,7 @@ void GameOverState::render()
     ClearBackground(SKYBLUE);
     BeginDrawing();
         DrawText("Game Over", (GetScreenWidth() / 2 - MeasureText("Game Over", 52) / 2), 80, 52, RED);
-        EndDrawing();
+        DrawText(TextFormat("Puntuación: %d", puntuacion),
+         (GetScreenWidth() / 2 - MeasureText(TextFormat("Puntuación: %d", puntuacion), 32) / 2), 150, 32, BLACK);
+    EndDrawing();
 }
