@@ -22,5 +22,7 @@ void MainGameState::update(float deltaTime)
 
 void MainGameState::render()
 {
-
+    BeginDrawing();
+        ClearBackground(DARKGRAY);
+    EndDrawing();
 }
