@@ -5,6 +5,16 @@ extern "C" {
     #include <raylib.h>
 }
 
+struct Player{
+    float x;
+    float y;
+    float vx;
+    float vy;
+    float height;
+    float width;
+    bool canJump = true;
+};
+
 class MainGameState : public GameState
 {
     public:
@@ -13,6 +23,7 @@ class MainGameState : public GameState
 
         void init() override;
         void handleInput() override;
+        void handleInput(float deltaTime);
         void update(float deltaTime) override;
         void render() override;
 
@@ -22,4 +33,6 @@ class MainGameState : public GameState
     
     private:
         char entered_key;
+
+        Player player;
 };
