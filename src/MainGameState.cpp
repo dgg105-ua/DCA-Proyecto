@@ -41,11 +41,15 @@ void MainGameState::handleInput(){
 
 void MainGameState::handleInput(float deltaTime)
 {
-    if (IsKeyDown(KEY_A)) player.x -= player.vx * deltaTime;
-    if (IsKeyDown(KEY_D)) player.x += player.vx * deltaTime;
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (IsKeyDown(KEY_A)){
+        if(player.x > 0) player.x -= player.vx * deltaTime;
+    } 
+    if (IsKeyDown(KEY_D)){
+        if(player.x < GetScreenWidth()) player.x += player.vx * deltaTime;
+    }
+    if (IsKeyDown(KEY_SPACE) && player.canJump){
         player.vy = -500;
-        //player.canJump = false;
+        player.canJump = false;
     }
 }
 
