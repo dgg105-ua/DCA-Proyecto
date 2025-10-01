@@ -11,7 +11,7 @@ void GameOverState::init(){
 
 void GameOverState::handleInput()
 {
-    if (IsKeyPressed(KEY_SPACE)) {
+    if (GetKeyPressed() != 0) {
         auto mainGameState = std::make_unique<MainGameState>();
         mainGameState->setStateMachine(state_machine);
         state_machine->add_state(std::move(mainGameState), true);
