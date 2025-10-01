@@ -1,5 +1,6 @@
 #pragma once
 #include <GameState.hpp>
+#include <deque>
 
 extern "C" {
     #include <raylib.h>
@@ -13,6 +14,11 @@ struct Player{
     float height;
     float width;
     bool canJump = true;
+    Rectangle boundingBox;
+};
+
+struct Estructura{
+    Rectangle rect;
 };
 
 class MainGameState : public GameState
@@ -36,4 +42,6 @@ class MainGameState : public GameState
 
         Player player;
         Camera2D camera;
+
+        std::deque<Estructura> estructuras; // Estructuras en el juego
 };
