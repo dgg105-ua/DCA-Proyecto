@@ -1,5 +1,6 @@
 #include <MainGameState.hpp>
 #include <iostream>
+#include <GameOverState.hpp>
 
 MainGameState::MainGameState()
 {
@@ -21,6 +22,10 @@ void MainGameState::init()
     camera.offset = { GetScreenWidth()/2.0f, GetScreenHeight()*0.60f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
+
+    lava.vy = 20.0f;
+    Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 300};
+    lava.rect = lavaRect;
 
     Estructura estructura;
     estructura.rect.x = 0;
@@ -108,6 +113,14 @@ void MainGameState::update(float deltaTime)
     else{
         camera.target = { GetScreenWidth()/2.0f, -GetScreenHeight()*0.40f };
     }
+
+    lava.rect.y -= lava.vy * deltaTime;
+    if(CheckCollisionRecs(player.boundingBox, lava.rect)){
+        auto gameOverState = std::make_unique<GameOverState>();
+        gameOverState->setStateMachine(state_machine);
+        //gameOverState->setPuntuacion(0); // En un futuro, pasar tiempo de partida
+        state_machine->add_state(std::move(gameOverState), true);
+    }
 }
 
 void MainGameState::render()
@@ -121,6 +134,8 @@ void MainGameState::render()
             for(auto& estructura : estructuras) {
                 DrawRectangleRec(estructura.rect, LIGHTGRAY);
             }
+
+            DrawRectangleRec(lava.rect, ORANGE);
         
         EndMode2D();
     EndDrawing();

@@ -1,5 +1,6 @@
 #pragma once
 #include <GameState.hpp>
+#include <StateMachine.hpp>
 #include <deque>
 
 extern "C" {
@@ -21,6 +22,11 @@ struct Estructura{
     Rectangle rect;
 };
 
+struct Lava{
+    Rectangle rect;
+    float vy;
+}; 
+
 class MainGameState : public GameState
 {
     public:
@@ -35,7 +41,6 @@ class MainGameState : public GameState
 
         void pause(){};
         void resume(){};
-
     
     private:
         char entered_key;
@@ -44,4 +49,5 @@ class MainGameState : public GameState
         Camera2D camera;
 
         std::deque<Estructura> estructuras; // Estructuras en el juego
+        Lava lava;
 };
