@@ -123,6 +123,12 @@ void MainGameState::render()
 
             // Lava
             DrawRectangleRec(lava.rect, ORANGE);
+
+            // Puntuación
+            DrawText(TextFormat("Puntuación: %d", (int)puntuacion),
+                            camera.target.x - camera.offset.x + 10,
+                            camera.target.y - camera.offset.y + 10,
+                            24, BLACK);
         
         EndMode2D();
     EndDrawing();
