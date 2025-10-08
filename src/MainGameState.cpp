@@ -30,7 +30,7 @@ void MainGameState::init()
     camera.zoom = 1.0f;
 
     // Inicializar Lava
-    lava.vy = 30.0f;
+    lava.vy = 150.0f;
     Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 1000};
     lava.rect = lavaRect;
 
@@ -42,10 +42,6 @@ void MainGameState::init()
     generarEstructura(estructuras, 0, -10000, 80, 10000); // Pared izquierda
     generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000); // Pared derecha
 
-    generarEstructura(estructuras, 150, -200, 100, 20);
-    generarEstructura(estructuras, 350, -350, 100, 20);
-    generarEstructura(estructuras, 600, -500, 100, 20);
-    generarEstructura(estructuras, 200, -650, 100, 20);
 }
 
 // No se usa, usar el de abajo (con deltaTime)
@@ -97,6 +93,22 @@ void MainGameState::update(float deltaTime)
         gameOverState->setStateMachine(state_machine);
         gameOverState->setPuntuacion(puntuacion);
         state_machine->add_state(std::move(gameOverState), true);
+    }
+
+    while (ultimoY > player.y - GetScreenHeight()) {
+        // Establecer ancho y alto de la plataforma
+        float ancho = GetRandomValue(80, 150);
+        float alto = 20;
+
+        // Establecer distancia horizontal
+        float x = ultimoX + GetRandomValue(-plataformasGapX, plataformasGapX); // X cercana a la anterior
+        if (x < 80) x = GetScreenWidth()/2; // No salirse por la izquierda
+        if (x > GetScreenWidth() - 160) x = GetScreenWidth()/2; // No salirse por la derecha
+        ultimoX = x;
+
+        generarEstructura(estructuras, x, ultimoY, ancho, alto);
+
+        ultimoY -= plataformasGapY; // Siguiente más arriba
     }
 }
 
