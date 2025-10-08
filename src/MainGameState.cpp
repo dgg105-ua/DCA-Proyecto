@@ -9,6 +9,7 @@ MainGameState::MainGameState()
 void generarEstructura(std::deque<Estructura>& estructuras, float x, float y, float width, float height);
 bool gestionarColisiones(std::deque<Estructura>& estructuras, Player& player);
 void gestionarSalto(Player& player, float deltaTime, bool& enSuelo);
+void gestionarLava(float deltaTime, Lava& lava, Player& player, StateMachine* state_machine, float& puntuacion, std::deque<Estructura>& estructuras);
 
 void MainGameState::init()
 {
@@ -86,15 +87,9 @@ void MainGameState::update(float deltaTime)
         camera.target = { GetScreenWidth()/2.0f, -GetScreenHeight()*0.40f };
     }
 
-    // Actualizar lava
-    lava.rect.y -= lava.vy * deltaTime;
-    if(CheckCollisionRecs(player.boundingBox, lava.rect)){
-        auto gameOverState = std::make_unique<GameOverState>();
-        gameOverState->setStateMachine(state_machine);
-        gameOverState->setPuntuacion(puntuacion);
-        state_machine->add_state(std::move(gameOverState), true);
-    }
+    gestionarLava(deltaTime, lava, player, state_machine, puntuacion, estructuras);
 
+    // Generar nuevas estructuras si es necesario
     while (ultimoY > player.y - GetScreenHeight()) {
         // Establecer ancho y alto de la plataforma
         float ancho = GetRandomValue(80, 150);
@@ -210,5 +205,28 @@ void gestionarSalto(Player& player, float deltaTime, bool& enSuelo) {
             player.vy += gravedad * deltaTime;
         }
         player.y += player.vy * deltaTime;
+    }
+}
+
+void gestionarLava(float deltaTime, Lava& lava, Player& player, StateMachine* state_machine, float& puntuacion, std::deque<Estructura>& estructuras) {
+
+    // Eliminar estructuras que estén por debajo de la lava
+    // Uso de iterador para evitar problemas al borrar mientras se itera
+    for (auto it = estructuras.begin(); it != estructuras.end(); ) {
+    if (it->rect.y > lava.rect.y) {
+        it = estructuras.erase(it); // erase devuelve el siguiente iterador
+    } else {
+        ++it; // avanzar solo si no borramos
+    }
+}   
+
+    // Actualizar lava
+    lava.rect.y -= lava.vy * deltaTime;
+    if(CheckCollisionRecs(player.boundingBox, lava.rect)){
+        
+        auto gameOver = std::make_unique<GameOverState>();
+        gameOver->setStateMachine(state_machine);
+        gameOver->setPuntuacion(puntuacion); // En un futuro, pasar tiempo de partida
+        state_machine->add_state(std::move(gameOver), true);
     }
 }

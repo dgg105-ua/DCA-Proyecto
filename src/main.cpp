@@ -16,6 +16,7 @@ int main()
     //InitWindow(1280, 720, "DCA Practica Grupal");
     SetConfigFlags(FLAG_FULLSCREEN_MODE);  
     InitWindow(1920, 1080, "DCA Practica Grupal");
+    SetTargetFPS(60);
 
     auto mainMenu = std::make_unique<MainMenuState>();
     mainMenu->setStateMachine(&state_machine);
