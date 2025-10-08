@@ -16,6 +16,10 @@ struct Player{
     float width;
     bool canJump = true;
     Rectangle boundingBox;
+
+    // Mecanicas de salto
+    float jumpBufferTime = 0.0f;    // Buffer de salto: Permite saltar un poco antes de tocar el suelo
+    float coyoteTime = 0.0f;    // Tiempo de coyote: Permite saltar un poco después de haber salido del suelo
 };
 
 struct Estructura{

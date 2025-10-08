@@ -8,6 +8,7 @@ MainGameState::MainGameState()
 
 void generarEstructura(std::deque<Estructura>& estructuras, float x, float y, float width, float height);
 bool gestionarColisiones(std::deque<Estructura>& estructuras, Player& player);
+void gestionarSalto(Player& player, float deltaTime, bool& enSuelo);
 
 void MainGameState::init()
 {
@@ -38,8 +39,8 @@ void MainGameState::init()
 
     // Generación de estructuras
     generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50); // Suelo inicial
-    generarEstructura(estructuras, 0, -1000, 80, 1000); // Pared izquierda
-    generarEstructura(estructuras, GetScreenWidth()-80, -1000, 80, 1000); // Pared derecha
+    generarEstructura(estructuras, 0, -10000, 80, 10000); // Pared izquierda
+    generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000); // Pared derecha
 
     generarEstructura(estructuras, 150, -200, 100, 20);
     generarEstructura(estructuras, 350, -350, 100, 20);
@@ -59,26 +60,23 @@ void MainGameState::handleInput(float deltaTime)
     if (IsKeyDown(KEY_D)){
         if(player.x < GetScreenWidth()) player.x += player.vx * deltaTime;
     }
-    if (IsKeyDown(KEY_SPACE) && player.canJump){
-        player.vy = -600;
-        player.canJump = false;
+    if (IsKeyPressed(KEY_SPACE)){
+        // Añade 1ms al buffer de salto
+        player.jumpBufferTime = 0.1f;
     }
 }
 
 void MainGameState::update(float deltaTime)
 {
-    handleInput(deltaTime);
 
-    const int gravedad = 1000;
     puntuacion += deltaTime;
 
     // Gestión de colisiones
     bool enSuelo = gestionarColisiones(estructuras, player);
 
-    if(!enSuelo){
-        player.vy += gravedad * deltaTime;
-        player.y += player.vy * deltaTime;
-    }
+    gestionarSalto(player, deltaTime, enSuelo);
+
+    handleInput(deltaTime);
 
     // Actualizar bounding box del jugador
     player.boundingBox.x = player.x - player.width/2;
@@ -168,4 +166,37 @@ bool gestionarColisiones(std::deque<Estructura>& estructuras, Player& player) {
         }
     }
     return enSuelo;
+}
+
+void gestionarSalto(Player& player, float deltaTime, bool& enSuelo) {
+    const int gravedad = 2000;
+
+    // Actualiza temporizadores de salto
+    player.jumpBufferTime -= deltaTime;
+    player.coyoteTime -= deltaTime;
+
+    // Si está en el suelo, reinicia el temporizador de coyote
+    if (enSuelo) {
+        player.coyoteTime = 0.1f; // margen de 100ms para saltar tras caer
+    }
+
+    // Lógica de salto inicial
+    if (player.jumpBufferTime > 0 && player.coyoteTime > 0) {
+        player.vy = -500;
+        player.canJump = false;
+        player.jumpBufferTime = 0;
+        player.coyoteTime = 0;
+    }
+
+    // Impulso y gravedad
+    if (!enSuelo) {
+        if (IsKeyDown(KEY_SPACE) && player.vy < 0) {
+            // Manteniendo el salto → gravedad reducida (subida más alta)
+            player.vy += gravedad * 0.3f * deltaTime;
+        } else {
+            // Gravedad normal
+            player.vy += gravedad * deltaTime;
+        }
+        player.y += player.vy * deltaTime;
+    }
 }
