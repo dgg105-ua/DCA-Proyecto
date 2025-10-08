@@ -93,7 +93,7 @@ void MainGameState::update(float deltaTime)
         primerFrame = false;
     } else{
         // Interpolación lineal para suavizar el movimiento de la cámara
-        float smoothFactor = 5.0f; // Factor de suavizado
+        float smoothFactor = 10.0f; // Factor de suavizado
         camera.target.x += (desiredCameraTarget.x - camera.target.x) * smoothFactor * deltaTime;
         camera.target.y += (desiredCameraTarget.y - camera.target.y) * smoothFactor * deltaTime;
     }
@@ -129,7 +129,15 @@ void MainGameState::render()
 
             // Estructura
             for(auto& estructura : estructuras) {
-                DrawRectangleRec(estructura.rect, LIGHTGRAY);
+                // Solo dibujar si está dentro del área visible de la cámara (con un margen de 200px)
+                if(estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 && 
+                   estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200) {
+                    DrawRectangleRec(estructura.rect, GRAY);
+                }
+                else if (estructura.rect.y < camera.target.y &&
+                         estructura.rect.y + estructura.rect.height > camera.target.y) {
+                    DrawRectangleRec(estructura.rect, GRAY);
+                }
             }
 
             // Lava
