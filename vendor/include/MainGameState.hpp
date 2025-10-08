@@ -60,4 +60,6 @@ class MainGameState : public GameState
         float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
         float ultimoX = GetScreenWidth()/2; // Posición X de primera plataforma generada
         float ultimoY = -200; // Posición Y de primera plataforma generada
+
+        bool primerFrame = true;
 };

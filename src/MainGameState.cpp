@@ -25,7 +25,7 @@ void MainGameState::init()
     player.boundingBox = boundingBox;
 
     // Inicializar Cámara
-    camera.target = { GetScreenWidth()/2.0f, player.y };
+    camera.target = { GetScreenWidth()/2.0f, -100 };
     camera.offset = { GetScreenWidth()/2.0f, GetScreenHeight()*0.60f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
@@ -80,11 +80,22 @@ void MainGameState::update(float deltaTime)
     player.boundingBox.y = player.y - player.height/2;
 
     // Actualizar cámara
+    Vector2 desiredCameraTarget;
     if(player.y < -GetScreenHeight()*0.40f){
-        camera.target = { GetScreenWidth()/2.0f, player.y };
+        desiredCameraTarget = { GetScreenWidth()/2.0f, player.y };
     }
     else{
-        camera.target = { GetScreenWidth()/2.0f, -GetScreenHeight()*0.40f };
+        desiredCameraTarget = { GetScreenWidth()/2.0f, -GetScreenHeight()*0.40f };
+    }
+
+    if(primerFrame){
+        camera.target = desiredCameraTarget;
+        primerFrame = false;
+    } else{
+        // Interpolación lineal para suavizar el movimiento de la cámara
+        float smoothFactor = 5.0f; // Factor de suavizado
+        camera.target.x += (desiredCameraTarget.x - camera.target.x) * smoothFactor * deltaTime;
+        camera.target.y += (desiredCameraTarget.y - camera.target.y) * smoothFactor * deltaTime;
     }
 
     gestionarLava(deltaTime, lava, player, state_machine, puntuacion, estructuras);
