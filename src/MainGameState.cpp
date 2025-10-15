@@ -1,6 +1,7 @@
 #include <MainGameState.hpp>
 #include <iostream>
 #include <GameOverState.hpp>
+#include <cmath>
 
 MainGameState::MainGameState()
 {
@@ -10,6 +11,8 @@ void generarEstructura(std::deque<Estructura>& estructuras, float x, float y, fl
 bool gestionarColisiones(std::deque<Estructura>& estructuras, Player& player);
 void gestionarSalto(Player& player, float deltaTime, bool& enSuelo);
 void gestionarLava(float deltaTime, Lava& lava, Player& player, StateMachine* state_machine, float& puntuacion, std::deque<Estructura>& estructuras);
+void generarPowerUp(PowerUp& powerUp, float playerY);
+void gestionarPowerUp(PowerUp& powerUp, Player& player, float deltaTime, float& spawnTimer, float& spawnInterval);
 
 void MainGameState::init()
 {
@@ -37,6 +40,13 @@ void MainGameState::init()
 
     // Inicializar puntuación
     puntuacion = 0.0f;
+
+    // Inicializar power-up (inactivo al inicio)
+    powerUp.active = false;
+    powerUp.radius = 20.0f;
+    powerUp.color = GREEN;
+    powerUpSpawnTimer = 0.0f;
+    powerUpSpawnInterval = GetRandomValue(5, 8); // Primera aparición entre 5-8 segundos (más frecuente)
 
     // Generación de estructuras
     generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50); // Suelo inicial
@@ -100,6 +110,9 @@ void MainGameState::update(float deltaTime)
 
     gestionarLava(deltaTime, lava, player, state_machine, puntuacion, estructuras);
 
+    // Gestionar power-up
+    gestionarPowerUp(powerUp, player, deltaTime, powerUpSpawnTimer, powerUpSpawnInterval);
+
     // Generar nuevas estructuras si es necesario
     while (ultimoY > player.y - GetScreenHeight()) {
         // Establecer ancho y alto de la plataforma
@@ -142,6 +155,13 @@ void MainGameState::render()
 
             // Lava
             DrawRectangleRec(lava.rect, ORANGE);
+
+            // Power-up (si está activo)
+            if (powerUp.active) {
+                DrawCircle(powerUp.x, powerUp.y, powerUp.radius, powerUp.color);
+                // Efecto de brillo (círculo más grande transparente)
+                DrawCircle(powerUp.x, powerUp.y, powerUp.radius + 5, Fade(powerUp.color, 0.3f));
+            }
 
             // Puntuación
             DrawText(TextFormat("Puntuación: %d", (int)puntuacion),
@@ -253,5 +273,54 @@ void gestionarLava(float deltaTime, Lava& lava, Player& player, StateMachine* st
         gameOver->setStateMachine(state_machine);
         gameOver->setPuntuacion(puntuacion); // En un futuro, pasar tiempo de partida
         state_machine->add_state(std::move(gameOver), true);
+    }
+}
+
+void generarPowerUp(PowerUp& powerUp, float playerY) {
+    powerUp.active = true;
+    
+    // Generar posición aleatoria en X (evitando los bordes)
+    powerUp.x = GetRandomValue(100, GetScreenWidth() - 100);
+    
+    // Generar posición en Y muy por encima del jugador (fuera de la vista inicial)
+    powerUp.y = playerY - GetRandomValue(800, 1200);
+}
+
+void gestionarPowerUp(PowerUp& powerUp, Player& player, float deltaTime, float& spawnTimer, float& spawnInterval) {
+    // Actualizar temporizador de aparición
+    spawnTimer += deltaTime;
+    
+    // Si el power-up no está activo y ha pasado el tiempo de intervalo, generar uno nuevo
+    if (!powerUp.active && spawnTimer >= spawnInterval) {
+        generarPowerUp(powerUp, player.y);
+        spawnTimer = 0.0f;
+        // Establecer nuevo intervalo aleatorio para la próxima aparición (más frecuente)
+        spawnInterval = GetRandomValue(5, 8);
+    }
+    
+    // Si el power-up está activo, verificar colisión con el jugador
+    if (powerUp.active) {
+        // Calcular distancia entre el centro del jugador y el power-up
+        float playerCenterX = player.x;
+        float playerCenterY = player.y;
+        
+        float distance = sqrtf(powf(playerCenterX - powerUp.x, 2) + powf(playerCenterY - powerUp.y, 2));
+        
+        // Si hay colisión (distancia menor al radio + mitad del ancho del jugador)
+        if (distance < powerUp.radius + player.width / 2) {
+            // Aplicar super salto (mucho más alto)
+            player.vy = -1500; // Salto súper alto (el normal es -500, antes era -1200)
+            player.jumpBufferTime = 0;
+            player.coyoteTime = 0;
+            
+            // Desactivar el power-up
+            powerUp.active = false;
+            spawnTimer = 0.0f;
+        }
+        
+        // Si el power-up queda muy por debajo del jugador, desactivarlo
+        if (powerUp.y > player.y + GetScreenHeight()) {
+            powerUp.active = false;
+        }
     }
 }

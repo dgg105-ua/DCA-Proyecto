@@ -29,6 +29,14 @@ struct Estructura{
 struct Lava{
     Rectangle rect;
     float vy;
+};
+
+struct PowerUp{
+    float x;
+    float y;
+    float radius;
+    bool active;
+    Color color;
 }; 
 
 class MainGameState : public GameState
@@ -55,6 +63,11 @@ class MainGameState : public GameState
 
         std::deque<Estructura> estructuras; // Estructuras en el juego
         Lava lava;
+
+        // Sistema de power-ups
+        PowerUp powerUp;
+        float powerUpSpawnTimer = 0.0f;
+        float powerUpSpawnInterval = 8.0f; // Aparece cada 8-15 segundos (aleatorio)
 
         float plataformasGapX = 400.0f;   // Distancia horizontal entre plataformas
         float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
