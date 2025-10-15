@@ -22,6 +22,8 @@ class GameOverState : public GameState
         void setPuntuacion(int p) { puntuacion = p; }
     
     private:
-        char entered_key;
         int puntuacion = 0;
+        int selectedOption = 0;
+        Rectangle playAgainButton;
+        Rectangle returnToMenuButton;
 };
