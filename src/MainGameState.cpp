@@ -108,8 +108,8 @@ void MainGameState::update(float deltaTime)
 
         // Establecer distancia horizontal
         float x = ultimoX + GetRandomValue(-plataformasGapX, plataformasGapX); // X cercana a la anterior
-        if (x < 80) x = GetScreenWidth()/2; // No salirse por la izquierda
-        if (x > GetScreenWidth() - 160) x = GetScreenWidth()/2; // No salirse por la derecha
+        if (x < 80) x = GetScreenWidth()/4; // No salirse por la izquierda
+        if (x > GetScreenWidth() - 160) x = (GetScreenWidth()/4)*3; // No salirse por la derecha
         ultimoX = x;
 
         generarEstructura(estructuras, x, ultimoY, ancho, alto);
