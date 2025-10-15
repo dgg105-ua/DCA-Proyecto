@@ -56,7 +56,7 @@ class MainGameState : public GameState
         std::deque<Estructura> estructuras; // Estructuras en el juego
         Lava lava;
 
-        float plataformasGapX = 500.0f;   // Distancia horizontal entre plataformas
+        float plataformasGapX = 400.0f;   // Distancia horizontal entre plataformas
         float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
         float ultimoX = GetScreenWidth()/2; // Posición X de primera plataforma generada
         float ultimoY = -200; // Posición Y de primera plataforma generada
