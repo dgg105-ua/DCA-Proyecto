@@ -3,6 +3,7 @@
 #include <MainGameState.hpp>
 #include <MainMenuState.hpp>
 #include <StateMachine.hpp>
+using namespace std;
 
 GameOverState::GameOverState() : selectedOption(0)
 {
@@ -15,14 +16,14 @@ void GameOverState::init()
     float spacing = 20;
 
     playAgainButton = {
-        (GetScreenWidth() - buttonWidth) / 2,
-        GetScreenHeight() / 2 + 50,
+        (GetScreenWidth() - buttonWidth) / 2.0f,
+        GetScreenHeight() / 2.0f + 50.0f,
         buttonWidth,
         buttonHeight
     };
 
     returnToMenuButton = {
-        (GetScreenWidth() - buttonWidth) / 2,
+        (GetScreenWidth() - buttonWidth) / 2.0f,
         playAgainButton.y + buttonHeight + spacing,
         buttonWidth,
         buttonHeight
@@ -43,7 +44,6 @@ void GameOverState::handleInput()
         keyboardUsed = true;
     }
 
-    // Mouse navigation (only if keyboard wasn't used this frame)
     if (!keyboardUsed) {
         Vector2 mousePos = GetMousePosition();
         
@@ -55,17 +55,16 @@ void GameOverState::handleInput()
         }
     }
 
-    // Selection with Enter key
     if (IsKeyPressed(KEY_ENTER)) {
         if (selectedOption == 0) { // Play Again
-            auto mainGameState = std::make_unique<MainGameState>();
+            auto mainGameState = make_unique<MainGameState>();
             mainGameState->setStateMachine(state_machine);
-            state_machine->add_state(std::move(mainGameState), true);
+            state_machine->add_state(move(mainGameState), true);
         }
         else if (selectedOption == 1) { // Return to Menu
-            auto mainMenuState = std::make_unique<MainMenuState>();
+            auto mainMenuState = make_unique<MainMenuState>();
             mainMenuState->setStateMachine(state_machine);
-            state_machine->add_state(std::move(mainMenuState), true);
+            state_machine->add_state(move(mainMenuState), true);
         }
     }
 
@@ -74,14 +73,14 @@ void GameOverState::handleInput()
         Vector2 mousePos = GetMousePosition();
         
         if (CheckCollisionPointRec(mousePos, playAgainButton)) {
-            auto mainGameState = std::make_unique<MainGameState>();
+            auto mainGameState = make_unique<MainGameState>();
             mainGameState->setStateMachine(state_machine);
-            state_machine->add_state(std::move(mainGameState), true);
+            state_machine->add_state(move(mainGameState), true);
         }
         else if (CheckCollisionPointRec(mousePos, returnToMenuButton)) {
-            auto mainMenuState = std::make_unique<MainMenuState>();
+            auto mainMenuState = make_unique<MainMenuState>();
             mainMenuState->setStateMachine(state_machine);
-            state_machine->add_state(std::move(mainMenuState), true);
+            state_machine->add_state(move(mainMenuState), true);
         }
     }
 }
