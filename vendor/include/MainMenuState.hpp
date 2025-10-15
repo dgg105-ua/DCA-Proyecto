@@ -1,6 +1,10 @@
 #pragma once
 #include <GameState.hpp>
 
+extern "C" {
+    #include <raylib.h>
+}
+
 class MainMenuState : public GameState
 {
     public:
@@ -18,5 +22,7 @@ class MainMenuState : public GameState
         void loadBackground();
 
     private:
-        char entered_key;
+        int selectedOption;
+        Rectangle playButton;
+        Rectangle exitButton;
 };
