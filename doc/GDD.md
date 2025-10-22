@@ -3,7 +3,7 @@
 ---
 
 ## 0. Metadatos
-- **Título del juego:** Prime-8 Project
+- **Título del juego:** Project Prime-8
 - **Versión del documento:** v1.0.0
 - **Estado del juego:** Pre-Alpha
 - **Equipo:** Daniel García-Diego González, Máximo Laino Chiaro, Gabriel Manso Gutiérrez de Rozas
@@ -39,7 +39,7 @@ Arcade vertical de precisión en el que **tú decides cada salto**: te mueves la
 
 ## 2. Introducción
 
-### 2.1 Resumen (≤75 palabras)
+### 2.1 Resumen
 Arcade vertical para PC donde **cargas cada salto**: mantener **Espacio** aumenta la fuerza **hasta un límite**. Encadena saltos precisos, lee patrones de plataformas y sobrevive al **gas**. **Power-ups** temporales (salto mayor, control aéreo, escudo).
 
 ---
@@ -95,7 +95,7 @@ Aparecer → **leer** plataformas → **moverse** (A/D) → **mantener** Espacio
 
 ## 6. Controles y accesibilidad
 
-### 6.1 PC (teclado/mando)
+### 6.1 PC
 - **Mover izquierda/derecha:** `A / D` o `← / →`
 - **Salto con carga:** **Mantener** `ESPACIO` para **cargar** y **soltar** para saltar (cuanto más sostienes, **más salto**, con **límite**).
 - **Pausa:** `ESC`.
