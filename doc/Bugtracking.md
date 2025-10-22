@@ -1,4 +1,4 @@
-## Sistema de bugtracking: **Jira** (versión breve)
+## Sistema de bugtracking: **Jira**
 
 ### Enlace al Formulario
 https://dcaproyectogrupo.atlassian.net/jira/software/c/form/527e922d-2147-4d0a-91c6-c98137901fc7
