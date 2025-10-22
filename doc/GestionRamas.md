@@ -8,7 +8,7 @@ GitHub Flow es un flujo **ligero** basado en una rama principal estable (**`main
 2. Commits pequeños y descriptivos (incluyendo la **clave de Jira**).
 3. Abrir PR a `main` (revisión + CI verde).
 
-### 1.2 Por qué se ajusta a este proyecto (justificación)
+### 1.2 Por qué se ajusta a este proyecto
 - **Equipo pequeño (3 personas)** y **alcance PC**: necesitamos **fricción mínima** y ciclos rápidos.
 - **Pre-Alpha** con entregas frecuentes: GitHub Flow favorece **iteración corta** y **PRs** claros.
 - **Hotfixes** sencillos: rama `fix/…` desde `main` y PR rápida.

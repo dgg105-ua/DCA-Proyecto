@@ -16,10 +16,10 @@
 ### 1.1 Gran concepto
 “**Salta sin parar** escalando plataformas, **carga tu salto** y usa **objetos** que te ayudan a **huir del gas** que asciende.”
 
-### 1.2 Elevator pitch (actualizado)
+### 1.2 Elevator pitch
 Arcade vertical de precisión en el que **tú decides cada salto**: te mueves lateralmente y **cuanto más tiempo mantengas el salto, más alto/largo será**. El reto está en **leer el patrón de plataformas**, **gestionar el timing** de la carga y **encadenar saltos óptimos** mientras el gas sube. **Power-ups** temporales amplían tus capacidades (salto más grande, mejor control aéreo, escudo, etc.).
 
-### 1.3 Pilares (resumidos)
+### 1.3 Pilares
 1) **Claridad en 5 s** (se entiende sin leer).  
 2) **Control preciso** (mismo input = mismo salto).  
 3) **Legibilidad ante todo** (tipos de plataforma claros).  
@@ -44,7 +44,7 @@ Arcade vertical para PC donde **cargas cada salto**: mantener **Espacio** aument
 
 ---
 
-## 3. Resumen del juego (Game Overview)
+## 3. Resumen del juego
 
 ### 3.1 Concepto
 **Objetivo:** alcanzar la **máxima altura**.  
@@ -58,7 +58,7 @@ Arcade vertical para PC donde **cargas cada salto**: mantener **Espacio** aument
 - **Motivo de interés:** curva de habilidad clara (saltos cargados), runs cortos.
 
 ### 3.3 Género
-**Plataformas Arcade vertical (Score-Chaser).**
+**Plataformas Arcade vertical**
 
 ### 3.4 Ambientación
 **Torre volcánica** estilizada en 2D cartoon; colores fríos/neutros para plataformas.
@@ -100,7 +100,7 @@ Aparecer → **leer** plataformas → **moverse** (A/D) → **mantener** Espacio
 - **Salto con carga:** **Mantener** `ESPACIO` para **cargar** y **soltar** para saltar (cuanto más sostienes, **más salto**, con **límite**).
 - **Pausa:** `ESC`.
 
-### 6.2 Accesibilidad (opciones)
+### 6.2 Accesibilidad
 - **Curva de carga:** Lineal (base).
 - **Micro-salto:** taps < **120 ms** → impulso corto y controlado.  
 - **Tamaños UI altos** y alto contraste.  
@@ -174,7 +174,7 @@ Eje vertical claro **laboratorio → exterior torre → atmósfera → órbita**
 **Métricas constantes:** plataformas estándar ; frágiles ; **gaps**.
 
 ### 9.2 Interfaz
-**HUD:** altura (m), mejor marca, indicador de “peligro” cuando el gas se acerca, botón de pausa.  
+**HUD:** altura, mejor marca, indicador de “peligro” cuando el gas se acerca, botón de pausa.  
 **Menús:** navegación por teclado/mando, foco claro; tarjetas para Jugar, Reto diario, Personalización, Clasificaciones, Opciones y Créditos; resumen de récords en portada.
 
 ---
@@ -198,7 +198,6 @@ La narrativa avanza con **cambios de bioma** y señales ambientales..
 **El Mono (sujeto de pruebas)**  
 - **Trasfondo:** identificado por un código de laboratorio; su motivación nace del póster del sistema solar.  
 - **Personalidad:** curioso, decidido; anima con gestos cuando mejora su marca.  
-- **Apariencia:** silueta cartoon con arnés de sensores; **skins** cosméticas (bandana, traje térmico, “astro-mono”).  
 - **Habilidades:** **salto con carga** (press & hold con límite), control aéreo, uso de power-ups.  
 - **Objetivo:** escapar y **alcanzar el espacio**.
 
