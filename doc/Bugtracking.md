@@ -17,10 +17,10 @@ https://dcaproyectogrupo.atlassian.net/jira/software/c/form/527e922d-2147-4d0a-9
 - **Prioridad**: Grado de prioridad (Lowest, Low, Medium, High o Highest)
 
 ### Plantilla de bug
-![Lista de Bugs](docs/img/ListaBugs.png)  
+![Lista de Bugs](img/ListaBugs.png)  
 En la lista puedes filtrar y ordenar por Estado, Severidad, Prioridad o Persona asignada para priorizar qué arreglar primero; también se ve de un vistazo qué bugs están bloqueando la entrega y cuáles ya se han resuelto.
 
-![Detalles de Bugs](docs/img/DetallesBugs.png)  
+![Detalles de Bugs](img/DetallesBugs.png)  
 En los detalles del bug se muestra toda la información necesaria para reproducirlo y arreglarlo (descripción, pasos..), además del historial de cambios y los vínculos a la rama/PR relacionados para seguir su progreso técnica y funcionalmente.
 
 **Severidad**: indica el impacto técnico/jugable del fallo (de muy baja a muy alta); ayuda a entender cuánto rompe la experiencia.  
