@@ -66,6 +66,23 @@ void MainGameState::init()
     generarEstructura(estructuras, 0, -10000, 80, 10000); // Pared izquierda
     generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000); // Pared derecha
 
+    // Iconos arriba derecha
+    float hudSize = 48.0f;
+    float margin = 10.0f;
+    float screenW = (float)GetScreenWidth();
+    hudShieldRect = { screenW - hudSize - margin, margin, hudSize, hudSize };
+    hudSlowRect   = { screenW - (hudSize*2.0f) - (margin*2.0f), margin, hudSize, hudSize };
+
+    // Iconos Arriba derecha PowerUps
+    if (FileExists("assets/shield.png")) {
+        hudShieldTex = LoadTexture("assets/shield.png");
+        hudShieldLoaded = (hudShieldTex.id != 0);
+    }
+    if (FileExists("assets/slow.png")) {
+        hudSlowTex = LoadTexture("assets/slow.png");
+        hudSlowLoaded = (hudSlowTex.id != 0);
+    }
+
 }
 
 // No se usa, usar el de abajo (con deltaTime)
@@ -224,6 +241,41 @@ void MainGameState::render()
 
                 DrawCircle((int)c.x, (int)c.y, r + 4.0f, Fade(BLUE, 0.18f));
             }
+            
+            //icono arriba derecha escudo
+            if (shieldActive) {
+                DrawRectangleRec(hudShieldRect, Fade(DARKBLUE, 0.25f));
+                DrawRectangleLinesEx(hudShieldRect, 2.0f, BLUE);
+
+                if (hudShieldLoaded) {
+                    Rectangle src = { 0, 0, (float)hudShieldTex.width, (float)hudShieldTex.height };
+                    DrawTexturePro(hudShieldTex, src, hudShieldRect, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                } else {
+                    DrawText("SH", (int)(hudShieldRect.x + 14), (int)(hudShieldRect.y + 12), 24, BLUE);
+                }
+            }
+
+            //icono arriba derecha escudo
+            if (slowActive) {
+                // animacion parpadeo icono cuando quedan 3 segundos
+                bool blink = (slowTimeLeft <= 3.0f) && (((int)(GetTime()*6.0f)) % 2 == 0);
+
+                Color frameColor = PURPLE;
+                if (blink) {
+                    DrawRectangleLinesEx(hudSlowRect, 2.0f, frameColor);
+                } else {
+                    DrawRectangleRec(hudSlowRect, Fade(frameColor, 0.25f));
+                    DrawRectangleLinesEx(hudSlowRect, 2.0f, frameColor);
+
+                    if (hudSlowLoaded) {
+                        Rectangle src = { 0, 0, (float)hudSlowTex.width, (float)hudSlowTex.height };
+                        DrawTexturePro(hudSlowTex, src, hudSlowRect, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                    } else {
+                        DrawText("SL", (int)(hudSlowRect.x + 14), (int)(hudSlowRect.y + 12), 24, PURPLE);
+                    }
+                }
+            }
+
 
 }
 

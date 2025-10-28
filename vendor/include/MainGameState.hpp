@@ -86,6 +86,21 @@ class MainGameState : public GameState
             float duration = 1.2f;
         } ufo;
 
+        PowerUp slowPU;
+        float slowSpawnTimer = 0.0f;
+        float slowSpawnInterval = 12.0f;
+        bool  slowActive = false;
+        float slowTimeLeft = 0.0f;
+        const float slowDuration = 10.0f;
+        float timeScale = 1.0f;
+
+        // Icono Tiempo Arriba Derecha
+        Texture2D hudShieldTex = {0};
+        bool hudShieldLoaded = false;
+        Texture2D hudSlowTex = {0};
+        bool hudSlowLoaded = false;
+        Rectangle hudShieldRect = {0};
+        Rectangle hudSlowRect = {0};
 
         float plataformasGapX = 400.0f;   // Distancia horizontal entre plataformas
         float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
