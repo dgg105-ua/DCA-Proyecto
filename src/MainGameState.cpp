@@ -13,6 +13,11 @@ void gestionarSalto(Player& player, float deltaTime, bool& enSuelo);
 void gestionarLava(float deltaTime, Lava& lava, Player& player, StateMachine* state_machine, float& puntuacion, std::deque<Estructura>& estructuras);
 void generarPowerUp(PowerUp& powerUp, float playerY);
 void gestionarPowerUp(PowerUp& powerUp, Player& player, float deltaTime, float& spawnTimer, float& spawnInterval);
+void generarShieldPU(PowerUp& shieldPU, float playerY);
+void gestionarShieldPU(PowerUp& shieldPU, Player& player, float deltaTime, float& spawnTimer, float& spawnInterval, bool& shieldActive);
+void iniciarRescateOVNI(Player& player, const Rectangle& lavaRect, MainGameState* self);
+void actualizarRescateOVNI(Player& player, float deltaTime, MainGameState* self);
+
 
 void MainGameState::init()
 {
@@ -42,6 +47,14 @@ void MainGameState::init()
     puntuacion = 0.0f;
 
     // Inicializar power-up (inactivo al inicio)
+    shieldPU.active = false;
+    shieldPU.radius = 22.0f;
+    shieldPU.color  = BLUE;
+    shieldSpawnTimer = 0.0f;
+    shieldSpawnInterval = GetRandomValue(10, 14);
+    shieldActive = false;
+    ufo = {};
+
     powerUp.active = false;
     powerUp.radius = 20.0f;
     powerUp.color = GREEN;
@@ -107,11 +120,25 @@ void MainGameState::update(float deltaTime)
         camera.target.x += (desiredCameraTarget.x - camera.target.x) * smoothFactor * deltaTime;
         camera.target.y += (desiredCameraTarget.y - camera.target.y) * smoothFactor * deltaTime;
     }
+    if (!ufo.active && shieldActive && CheckCollisionRecs(player.boundingBox, lava.rect)) {
+        shieldActive = false;
+        iniciarRescateOVNI(player, lava.rect, this);
+        player.boundingBox.x = player.x - player.width/2;
+        player.boundingBox.y = player.y - player.height/2;
+    }
 
     gestionarLava(deltaTime, lava, player, state_machine, puntuacion, estructuras);
 
     // Gestionar power-up
     gestionarPowerUp(powerUp, player, deltaTime, powerUpSpawnTimer, powerUpSpawnInterval);
+
+    gestionarShieldPU(shieldPU, player, deltaTime, shieldSpawnTimer, shieldSpawnInterval, shieldActive);
+    if (ufo.active) {
+        actualizarRescateOVNI(player, deltaTime, this);
+        player.boundingBox.x = player.x - player.width/2;
+        player.boundingBox.y = player.y - player.height/2;
+    }
+
 
     // Generar nuevas estructuras si es necesario
     while (ultimoY > player.y - GetScreenHeight()) {
@@ -162,13 +189,44 @@ void MainGameState::render()
                 // Efecto de brillo (círculo más grande transparente)
                 DrawCircle(powerUp.x, powerUp.y, powerUp.radius + 5, Fade(powerUp.color, 0.3f));
             }
+            if (shieldPU.active) {
+                DrawCircle(shieldPU.x, shieldPU.y, shieldPU.radius, shieldPU.color);
+                DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius + 6, DARKBLUE);
+            }
 
             // Puntuación
             DrawText(TextFormat("Puntuación: %d", (int)puntuacion),
                             camera.target.x - camera.offset.x + 10,
                             camera.target.y - camera.offset.y + 10,
                             24, BLACK);
-        
+            if (ufo.active) {
+            DrawEllipse(ufo.x, ufo.y, 40, 14, GRAY);
+            DrawEllipseLines(ufo.x, ufo.y, 40, 14, DARKGRAY);
+            DrawCircle(ufo.x, ufo.y - 6, 8, LIGHTGRAY);
+            Vector2 a = { ufo.x - 20, ufo.y + 8 };
+            Vector2 b = { ufo.x + 20, ufo.y + 8 };
+            Vector2 c = { player.x,   player.y + player.height/2 + 10 };
+            DrawTriangle(a, b, c, Fade(SKYBLUE, 0.35f));
+            DrawTriangleLines(a, b, c, Fade(DARKBLUE, 0.5f));
+
+            // Circulo Escudo alrededor del mono
+            if (shieldActive) {
+                Vector2 c = { player.x, player.y };
+
+                float base = ((player.width > player.height) ? player.width : player.height) * 0.75f + 12.0f;
+
+                float t = (float)GetTime();
+                float pulse = 2.5f * sinf(t * 3.0f);
+
+                float r = base + pulse;
+
+                DrawCircleLines((int)c.x, (int)c.y, r, BLUE);
+
+                DrawCircle((int)c.x, (int)c.y, r + 4.0f, Fade(BLUE, 0.18f));
+            }
+
+}
+
         EndMode2D();
     EndDrawing();
 }
@@ -322,5 +380,66 @@ void gestionarPowerUp(PowerUp& powerUp, Player& player, float deltaTime, float& 
         if (powerUp.y > player.y + GetScreenHeight()) {
             powerUp.active = false;
         }
+    }
+}
+
+void generarShieldPU(PowerUp& shieldPU, float playerY) {
+    shieldPU.active = true;
+    shieldPU.x = GetRandomValue(100, GetScreenWidth() - 100);
+    shieldPU.y = playerY - GetRandomValue(900, 1400);
+}
+
+void gestionarShieldPU(PowerUp& shieldPU, Player& player, float deltaTime, float& spawnTimer, float& spawnInterval, bool& shieldActive) {
+    spawnTimer += deltaTime;
+    if (!shieldPU.active && !shieldActive && spawnTimer >= spawnInterval) {
+        generarShieldPU(shieldPU, player.y);
+        spawnTimer = 0.0f;
+        spawnInterval = GetRandomValue(10, 14);
+    }
+    if (shieldPU.active) {
+        float dx = player.x - shieldPU.x;
+        float dy = player.y - shieldPU.y;
+        float dist2 = dx*dx + dy*dy;
+        float sumR = shieldPU.radius + player.width * 0.5f;
+        if (dist2 < sumR * sumR) {
+            shieldActive = true;
+            player.vy = -600;
+            shieldPU.active = false;
+            spawnTimer = 0.0f;
+        }
+        if (shieldPU.y > player.y + GetScreenHeight()) {
+            shieldPU.active = false;
+        }
+    }
+}
+
+void iniciarRescateOVNI(Player& player, const Rectangle& lavaRect, MainGameState* self) {
+    auto& ufo = self->ufo;
+    ufo.active = true;
+    ufo.timer = 0.0f;
+    ufo.duration = 1.2f;
+    ufo.vy = -900.0f;
+
+    ufo.x = player.x;
+    ufo.y = lavaRect.y - 80;
+
+    player.y = lavaRect.y - player.height - 6;
+    player.vy = -900.0f;
+}
+
+void actualizarRescateOVNI(Player& player, float deltaTime, MainGameState* self) {
+    auto& ufo = self->ufo;
+
+    ufo.timer += deltaTime;
+    ufo.y += ufo.vy * deltaTime;
+
+    float objetivoJugadorY = ufo.y + 70.0f;
+    player.y += (objetivoJugadorY - player.y) * 10.0f * deltaTime;
+    player.vy = -900.0f;
+
+    player.x += (ufo.x - player.x) * 8.0f * deltaTime;
+
+    if (ufo.timer >= ufo.duration) {
+        ufo.active = false;
     }
 }

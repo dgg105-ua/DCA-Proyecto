@@ -51,6 +51,10 @@ class MainGameState : public GameState
         void update(float deltaTime) override;
         void render() override;
 
+        friend void iniciarRescateOVNI(Player& player, const Rectangle& lavaRect, MainGameState* self);
+        friend void actualizarRescateOVNI(Player& player, float deltaTime, MainGameState* self);
+
+
         void pause(){};
         void resume(){};
     
@@ -68,6 +72,20 @@ class MainGameState : public GameState
         PowerUp powerUp;
         float powerUpSpawnTimer = 0.0f;
         float powerUpSpawnInterval = 8.0f; // Aparece cada 8-15 segundos (aleatorio)
+
+        PowerUp shieldPU;
+        float shieldSpawnTimer = 0.0f;
+        float shieldSpawnInterval = 10.0f;
+        bool  shieldActive = false;
+        struct RescueUFO {
+            bool active = false;
+            float x = 0.0f;
+            float y = 0.0f;
+            float vy = -800.0f;
+            float timer = 0.0f;
+            float duration = 1.2f;
+        } ufo;
+
 
         float plataformasGapX = 400.0f;   // Distancia horizontal entre plataformas
         float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
