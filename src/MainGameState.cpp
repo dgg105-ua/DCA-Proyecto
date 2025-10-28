@@ -208,6 +208,23 @@ void MainGameState::render()
             Vector2 c = { player.x,   player.y + player.height/2 + 10 };
             DrawTriangle(a, b, c, Fade(SKYBLUE, 0.35f));
             DrawTriangleLines(a, b, c, Fade(DARKBLUE, 0.5f));
+
+            // Circulo Escudo alrededor del mono
+            if (shieldActive) {
+                Vector2 c = { player.x, player.y };
+
+                float base = ((player.width > player.height) ? player.width : player.height) * 0.75f + 12.0f;
+
+                float t = (float)GetTime();
+                float pulse = 2.5f * sinf(t * 3.0f);
+
+                float r = base + pulse;
+
+                DrawCircleLines((int)c.x, (int)c.y, r, BLUE);
+
+                DrawCircle((int)c.x, (int)c.y, r + 4.0f, Fade(BLUE, 0.18f));
+            }
+
 }
 
         EndMode2D();
