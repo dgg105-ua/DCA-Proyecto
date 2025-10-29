@@ -29,9 +29,9 @@
 | Físicas | Daniel | Implementación del sistema de colisiones, gravedad, movimiento, etc. |
 | Mecánicas básicas | Daniel | Programación del movimiento del jugador, control y lógica general del juego. |
 | Menús | Máximo | Menús de inicio del juego y fin de la partida. |
-| Power-ups | Máximo | Diseño e implementación de mejoras temporales. |
+| Power-ups | Máximo, Gabriel | Diseño e implementación de mejoras temporales. |
 | Gráficos | Gabriel | Creación e integración de sprites, animaciones, fondos y efectos visuales. |
-| Sonido | Gabriel | Efectos de sonido, música y control del audio. |
+| Sonido | Por determinar | Efectos de sonido, música y control del audio. |
 | Documentación | Gabriel | Elaboración de la documentación técnica y de usuario. |
 
 ---
