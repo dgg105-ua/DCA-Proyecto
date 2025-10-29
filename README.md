@@ -7,6 +7,8 @@
 **Link al repositorio GitHub:** https://github.com/dgg105-ua/DCA-Proyecto       
 **Link al formulario de BugTracking:** https://dcaproyectogrupo.atlassian.net/jira/software/c/form/527e922d-2147-4d0a-91c6-c98137901fc7
 
+**Toda la documentación específica de cada Hito está ubicada en el directorio /doc**
+
 ---
 
 ## 👥 Integrantes del equipo
