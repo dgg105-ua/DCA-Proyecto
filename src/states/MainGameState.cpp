@@ -19,6 +19,8 @@ void iniciarRescateOVNI(Player& player, const Rectangle& lavaRect, MainGameState
 void actualizarRescateOVNI(Player& player, float deltaTime, MainGameState* self);
 void generarSlowPU(PowerUp& slowPU, float playerY);
 void gestionarSlowPU(PowerUp& slowPU, Player& player, float deltaTime, float& spawnTimer, float& spawnInterval, bool& slowActive, float& slowTimeLeft, float slowDuration, float& timeScale);
+void generarDoublePU(PowerUp& doublePU, float playerY);
+void gestionarDoublePU(PowerUp& doublePU, Player& player, float deltaTime, float& spawnTimer, float& spawnInterval, bool& doubleActive, float& doubleTimeLeft, float doubleDuration, float& puntuacionX);
 
 void MainGameState::init()
 {
@@ -60,6 +62,15 @@ void MainGameState::init()
     slowTimeLeft = 0.0f;
     timeScale = 1.0f;
 
+    doublePU.active = false;
+    doublePU.radius = 22.0f;
+    doublePU.color  = GOLD;
+    doubleSpawnTimer = 0.0f;
+    doubleSpawnInterval = GetRandomValue(14, 20);
+    doubleActive = false;
+    doubleTimeLeft = 0.0f;
+    puntuacionX = 1.0f;
+
     powerUp.active = false;
     powerUp.radius = 20.0f;
     powerUp.color = GREEN;
@@ -75,15 +86,22 @@ void MainGameState::init()
     float screenW = (float)GetScreenWidth();
     hudShieldRect = { screenW - hudSize - margin, margin, hudSize, hudSize };
     hudSlowRect   = { screenW - (hudSize*2.0f) - (margin*2.0f), margin, hudSize, hudSize };
+    hudDoubleRect = { screenW - (hudSize*3.0f) - (margin*3.0f), margin, hudSize, hudSize };
 
     const char* SHIELD_CANDIDATES[] = { "assets/shield.png", "src/assets/shield.png" };
     for (const char* p : SHIELD_CANDIDATES) {
         if (FileExists(p)) { hudShieldTex = LoadTexture(p); hudShieldLoaded = (hudShieldTex.id != 0); break; }
     }
+
     const char* SLOW_CANDIDATES[] = { "assets/slow.png", "src/assets/slow.png" };
     for (const char* p : SLOW_CANDIDATES) {
         if (FileExists(p)) { hudSlowTex = LoadTexture(p); hudSlowLoaded = (hudSlowTex.id != 0); break; }
     }
+
+    const char* DOUBLE_CANDIDATES[] = { "assets/double.png", "src/assets/double.png" };
+        for (const char* p : DOUBLE_CANDIDATES) {
+            if (FileExists(p)) { hudDoubleTex = LoadTexture(p); hudDoubleLoaded = (hudDoubleTex.id != 0); break; }
+        }
 }
 
 void MainGameState::handleInput(){
@@ -104,7 +122,7 @@ void MainGameState::handleInput(float deltaTime)
 
 void MainGameState::update(float deltaTime)
 {
-    puntuacion += deltaTime;
+    puntuacion += deltaTime * puntuacionX;
 
     timeScale = slowActive ? 0.4f : 1.0f;
     float dt = deltaTime * timeScale;
@@ -175,6 +193,18 @@ void MainGameState::update(float deltaTime)
         generarEstructura(estructuras, x, ultimoY, ancho, alto);
         ultimoY -= plataformasGapY;
     }
+
+    gestionarDoublePU(doublePU, player, dt, doubleSpawnTimer, doubleSpawnInterval,doubleActive, doubleTimeLeft, doubleDuration, puntuacionX);
+
+    if (doubleActive) {
+    doubleTimeLeft -= deltaTime;
+    if (doubleTimeLeft <= 0.0f) {
+        doubleActive = false;
+        doubleTimeLeft = 0.0f;
+        puntuacionX = 1.0f;
+    }
+}
+
 }
 
 void MainGameState::render()
@@ -214,6 +244,11 @@ void MainGameState::render()
             DrawCircle(slowPU.x, slowPU.y, slowPU.radius + 5, Fade(PURPLE, 0.3f));
         }
 
+        if (doublePU.active) {
+            DrawCircle(doublePU.x, doublePU.y, doublePU.radius, GOLD);
+            DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
+        }
+
         DrawText(TextFormat("Puntuacion: %d", (int)puntuacion),
                  (int)(camera.target.x - camera.offset.x + 10),
                  (int)(camera.target.y - camera.offset.y + 10),
@@ -238,6 +273,11 @@ void MainGameState::render()
             float r = base + pulse;
             DrawCircleLines((int)cc.x, (int)cc.y, r, BLUE);
             DrawCircle((int)cc.x, (int)cc.y, r + 4.0f, Fade(BLUE, 0.18f));
+        }
+
+        if (doublePU.active) {
+            DrawCircle(doublePU.x, doublePU.y, doublePU.radius, GOLD);
+            DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
         }
 
     EndMode2D();
@@ -273,6 +313,22 @@ void MainGameState::render()
                     DrawTexturePro(hudSlowTex, src, slowRect, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
                 } else {
                     DrawText("SL", (int)(slowRect.x + 14), (int)(slowRect.y + 12), 24, PURPLE);
+                }
+            }
+        }
+
+        if (doubleActive) {
+            bool blink = (doubleTimeLeft <= 3.0f) && (((int)(GetTime()*6.0f)) % 2 == 0);
+            if (blink) {
+                DrawRectangleLinesEx(hudDoubleRect, 2.0f, GOLD);
+            } else {
+                DrawRectangleRec(hudDoubleRect, Fade(GOLD, 0.25f));
+                DrawRectangleLinesEx(hudDoubleRect, 2.0f, GOLD);
+                if (hudDoubleLoaded) {
+                    Rectangle src = { 0, 0, (float)hudDoubleTex.width, (float)hudDoubleTex.height };
+                    DrawTexturePro(hudDoubleTex, src, hudDoubleRect, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                } else {
+                    DrawText("x2", (int)(hudDoubleRect.x + 12), (int)(hudDoubleRect.y + 12), 24, GOLD);
                 }
             }
         }
@@ -498,6 +554,44 @@ void gestionarSlowPU(PowerUp& slowPU, Player& player, float deltaTime,
 
         if (slowPU.y > player.y + GetScreenHeight()) {
             slowPU.active = false;
+        }
+    }
+}
+
+void generarDoublePU(PowerUp& doublePU, float playerY) {
+    doublePU.active = true;
+    doublePU.x = GetRandomValue(100, GetScreenWidth() - 100);
+    doublePU.y = playerY - GetRandomValue(900, 1400);
+}
+
+void gestionarDoublePU(PowerUp& doublePU, Player& player, float deltaTime,
+                       float& spawnTimer, float& spawnInterval,
+                       bool& doubleActive, float& doubleTimeLeft,
+                       float doubleDuration, float& scoreRateMult) {
+    spawnTimer += deltaTime;
+
+    if (!doublePU.active && !doubleActive && spawnTimer >= spawnInterval) {
+        generarDoublePU(doublePU, player.y);
+        spawnTimer = 0.0f;
+        spawnInterval = GetRandomValue(14, 20);
+    }
+
+    if (doublePU.active) {
+        float dx = player.x - doublePU.x;
+        float dy = player.y - doublePU.y;
+        float dist2 = dx*dx + dy*dy;
+        float sumR = doublePU.radius + player.width * 0.5f;
+
+        if (dist2 < sumR * sumR) {
+            doubleActive   = true;
+            doubleTimeLeft = doubleDuration;
+            scoreRateMult  = 2.0f;
+            doublePU.active = false;
+            spawnTimer = 0.0f;
+        }
+
+        if (doublePU.y > player.y + GetScreenHeight()) {
+            doublePU.active = false;
         }
     }
 }
