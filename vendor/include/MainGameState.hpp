@@ -71,12 +71,14 @@ class MainGameState : public GameState
         // Sistema de power-ups
         PowerUp powerUp;
         float powerUpSpawnTimer = 0.0f;
-        float powerUpSpawnInterval = 8.0f; // Aparece cada 8-15 segundos (aleatorio)
+        float powerUpSpawnInterval = 8.0f;
 
         PowerUp shieldPU;
         float shieldSpawnTimer = 0.0f;
         float shieldSpawnInterval = 10.0f;
         bool  shieldActive = false;
+
+        // UFO PU escudo
         struct RescueUFO {
             bool active = false;
             float x = 0.0f;
@@ -86,6 +88,20 @@ class MainGameState : public GameState
             float duration = 1.2f;
         } ufo;
 
+        // PU realentizador
+        PowerUp slowPU;
+        float slowSpawnTimer = 0.0f;
+        float slowSpawnInterval = 12.0f;
+        bool  slowActive = false;
+        float slowTimeLeft = 0.0f;
+        const float slowDuration = 10.0f;
+        float timeScale = 1.0f;
+
+        // ICONOS ARRIBA DERECHA DE LOS POWERUPS
+        Texture2D hudShieldTex = {0}; bool hudShieldLoaded = false;
+        Texture2D hudSlowTex   = {0}; bool hudSlowLoaded   = false;
+        Rectangle hudShieldRect = {0};
+        Rectangle hudSlowRect   = {0};
 
         float plataformasGapX = 400.0f;   // Distancia horizontal entre plataformas
         float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
