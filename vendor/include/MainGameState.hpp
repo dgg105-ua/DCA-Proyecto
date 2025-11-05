@@ -97,11 +97,22 @@ class MainGameState : public GameState
         const float slowDuration = 10.0f;
         float timeScale = 1.0f;
 
+        // PU x2
+        PowerUp doublePU;
+        float doubleSpawnTimer = 0.0f;
+        float doubleSpawnInterval = 14.0f;
+        bool  doubleActive = false;
+        float doubleTimeLeft = 0.0f;
+        const float doubleDuration = 10.0f;
+        float puntuacionX = 1.0f;
+
         // ICONOS ARRIBA DERECHA DE LOS POWERUPS
         Texture2D hudShieldTex = {0}; bool hudShieldLoaded = false;
-        Texture2D hudSlowTex   = {0}; bool hudSlowLoaded   = false;
         Rectangle hudShieldRect = {0};
+        Texture2D hudSlowTex   = {0}; bool hudSlowLoaded   = false;
         Rectangle hudSlowRect   = {0};
+        Texture2D hudDoubleTex = {0}; bool hudDoubleLoaded = false;
+        Rectangle hudDoubleRect = {0};
 
         float plataformasGapX = 400.0f;   // Distancia horizontal entre plataformas
         float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
