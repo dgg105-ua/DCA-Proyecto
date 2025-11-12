@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-CXX = g++
+CXX = ccache g++
 CXXFLAGS = -I src/ -I vendor/include/ -L vendor/lib -lraylib -lGL -lm -lpthread -lrt -lX11
 
 SRC_DIRS = src/core src/states
@@ -15,9 +15,11 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
-$(OBJ_DIR)/%.o: src/%.cpp
-	mkdir -p $(dir $@)
+$(OBJ_DIR)/%.o: src/%.cpp | $(OBJ_DIR)
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET)
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
