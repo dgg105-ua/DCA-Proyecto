@@ -19,7 +19,7 @@ struct Player{
 
     // Mecanicas de salto
     float jumpBufferTime = 0.0f;    // Buffer de salto: Permite saltar un poco antes de tocar el suelo
-    float coyoteTime = 0.0f;    // Tiempo de coyote: Permite saltar un poco después de haber salido del suelo
+    float coyoteTime = 0.0f;        // Tiempo de coyote: Permite saltar un poco después de haber salido del suelo
 };
 
 struct Estructura{
@@ -53,7 +53,6 @@ class MainGameState : public GameState
 
         friend void iniciarRescateOVNI(Player& player, const Rectangle& lavaRect, MainGameState* self);
         friend void actualizarRescateOVNI(Player& player, float deltaTime, MainGameState* self);
-
 
         void pause(){};
         void resume(){};
@@ -120,4 +119,42 @@ class MainGameState : public GameState
         float ultimoY = -200; // Posición Y de primera plataforma generada
 
         bool primerFrame = true;
+
+        // =========================
+        //   SPRITES / ANIMACIÓN
+        // =========================
+        enum class PlayerAnimState {
+            Idle,
+            Run,
+            Jump
+        };
+
+        Texture2D playerIdleTex = {0};
+        Texture2D playerRunTex  = {0};
+        Texture2D playerJumpTex = {0};
+
+        Rectangle playerSrcRect = {0};
+        Rectangle playerDestRect = {0};
+
+        PlayerAnimState playerAnimState = PlayerAnimState::Idle;
+        int   playerDir = 1;          //  1 = derecha, -1 = izquierda
+        int   playerFrame = 0;
+        float playerFrameTime = 0.0f;
+
+        int   playerIdleFrames  = 0;
+        int   playerRunFrames   = 0;
+        int   playerJumpFrames  = 0;
+
+        float playerIdleFrameDur  = 0.022f; // mayor = más lento
+        float playerRunFrameDur   = 0.016f;
+        float playerJumpFrameDur  = 0.018f;
+
+        bool  playerMovingHoriz = false;
+        bool  playerIsOnGround  = false;
+
+        // Tamaño visual del sprite (32x32 * escala)
+        float playerSpriteScale = 2.5f; // cambia esto para hacer el mono más grande/pequeño
+
+        // Hitbox más pequeña que el mono
+        float hitboxScale = 0.8f;       // 0.6 = 60% del ancho/alto del jugador     
 };
