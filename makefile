@@ -22,4 +22,5 @@ clean:
 	rm -rf $(OBJ_DIR) $(TARGET)
 
 $(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+	mkdir -p $(OBJ_DIR)/core
+	mkdir -p $(OBJ_DIR)/states
