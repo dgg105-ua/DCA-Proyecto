@@ -1,0 +1,21 @@
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: ProjectPrime8
+
+finish-args:
+ - --socket=wayland
+ - --socket=fallback-x11
+ - --socket=pulseaudio
+ - --device=dri
+ - --share=ipc
+ 
+modules:
+ - name: ProjectPrime8
+   buildsystem: simple
+   build-commands:
+    - make
+    - make install PREFIX=/app
+   sources:
+     - type: dir
+       path: .
