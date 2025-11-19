@@ -1,11 +1,14 @@
-.PHONY: all clean
+.PHONY: all clean install uninstall
 
 CXX = ccache g++
 CXXFLAGS = -I src/ -I vendor/include/ -L vendor/lib -lraylib -lGL -lm -lpthread -lrt -lX11
 
 SRC_DIRS = src/core src/states
 OBJ_DIR = obj
-TARGET = game
+TARGET = ProjectPrime8
+
+PREFIX ?= /usr
+DESTDIR ?= 
 
 SRCS = $(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))
 OBJS = $(patsubst src/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
@@ -24,3 +27,9 @@ clean:
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)/core
 	mkdir -p $(OBJ_DIR)/states
+
+install: all
+	install -D -m 755 $(TARGET) $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+
+uninstall: clean
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)
