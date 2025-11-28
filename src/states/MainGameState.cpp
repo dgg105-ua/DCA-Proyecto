@@ -102,6 +102,38 @@ void MainGameState::init()
         for (const char* p : DOUBLE_CANDIDATES) {
             if (FileExists(p)) { hudDoubleTex = LoadTexture(p); hudDoubleLoaded = (hudDoubleTex.id != 0); break; }
         }
+
+    //SPRITE
+    // Carga de los sprites del personaje (Idle, Run, Jump)
+    const char* PLAYER_IDLE_CANDIDATES[] = {
+        "assets/img/player/Idle.png",
+        "assets/Idle.png"
+    };
+    const char* PLAYER_RUN_CANDIDATES[] = {
+        "assets/img/player/Run.png",
+        "assets/Run.png"
+    };
+    const char* PLAYER_JUMP_CANDIDATES[] = {
+        "assets/img/player/Jump.png",
+        "assets/Jump.png"
+    };
+
+    for (const char* p : PLAYER_IDLE_CANDIDATES) {
+        if (FileExists(p)) { playerIdleTexture = LoadTexture(p); break; }
+    }
+    for (const char* p : PLAYER_RUN_CANDIDATES) {
+        if (FileExists(p)) { playerRunTexture = LoadTexture(p); break; }
+    }
+    for (const char* p : PLAYER_JUMP_CANDIDATES) {
+        if (FileExists(p)) { playerJumpTexture = LoadTexture(p); break; }
+    }
+
+    playerAnimState   = PLAYER_IDLE;
+    playerCurrentFrame = 0;
+    playerFrameTimer   = 0.0f;
+    playerFrameSpeed   = 12.0f;  // fps
+    playerFacingRight  = true;
+    //SPRITE
 }
 
 void MainGameState::handleInput(){
@@ -205,6 +237,41 @@ void MainGameState::update(float deltaTime)
     }
 }
 
+    //SPRITE
+    // Actualización del estado de animación del jugador
+    if (!enSuelo) {
+        playerAnimState = PLAYER_JUMP;
+    } else {
+        bool moviendo = IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
+        playerAnimState = moviendo ? PLAYER_RUN : PLAYER_IDLE;
+    }
+
+    // Dirección en la que mira el mono
+    if (IsKeyDown(KEY_A)) {
+        playerFacingRight = false;
+    } else if (IsKeyDown(KEY_D)) {
+        playerFacingRight = true;
+    }
+
+    // Avance de frames de animación
+    playerFrameTimer += dt;
+    int maxFrames = 1;
+    switch (playerAnimState) {
+        case PLAYER_IDLE: maxFrames = PLAYER_IDLE_FRAMES; break;
+        case PLAYER_RUN:  maxFrames = PLAYER_RUN_FRAMES;  break;
+        case PLAYER_JUMP: maxFrames = PLAYER_JUMP_FRAMES; break;
+    }
+
+    if (maxFrames <= 0) maxFrames = 1;
+
+    if (playerFrameTimer >= 1.0f / playerFrameSpeed) {
+        playerFrameTimer = 0.0f;
+        playerCurrentFrame++;
+        if (playerCurrentFrame >= maxFrames) {
+            playerCurrentFrame = 0;
+        }
+    }
+    //SPRITE
 }
 
 void MainGameState::render()
@@ -215,6 +282,54 @@ void MainGameState::render()
     BeginMode2D(camera);
 
         DrawRectangleRec(player.boundingBox, RED);
+
+        //SPRITE
+        // Dibujar al jugador con los sprites si se han cargado
+        if (playerIdleTexture.id != 0) {
+            Texture2D currentTexture;
+            int maxFrames = 1;
+
+            switch (playerAnimState) {
+                case PLAYER_IDLE:
+                    currentTexture = playerIdleTexture;
+                    maxFrames = PLAYER_IDLE_FRAMES;
+                    break;
+                case PLAYER_RUN:
+                    currentTexture = playerRunTexture.id != 0 ? playerRunTexture : playerIdleTexture;
+                    maxFrames = (playerRunTexture.id != 0) ? PLAYER_RUN_FRAMES : PLAYER_IDLE_FRAMES;
+                    break;
+                case PLAYER_JUMP:
+                    currentTexture = playerJumpTexture.id != 0 ? playerJumpTexture : playerIdleTexture;
+                    maxFrames = (playerJumpTexture.id != 0) ? PLAYER_JUMP_FRAMES : PLAYER_IDLE_FRAMES;
+                    break;
+            }
+
+            if (maxFrames <= 0) maxFrames = 1;
+            int frameIndex = playerCurrentFrame % maxFrames;
+
+            Rectangle sourceRect = {
+                (float)(frameIndex * PLAYER_SPRITE_WIDTH),
+                0.0f,
+                playerFacingRight ? (float)PLAYER_SPRITE_WIDTH : -(float)PLAYER_SPRITE_WIDTH,
+                (float)PLAYER_SPRITE_HEIGHT
+            };
+
+            // Escalamos el sprite para que coincida más o menos con la hitbox
+            float scaleX = player.width  / (float)PLAYER_SPRITE_WIDTH;
+            float scaleY = player.height / (float)PLAYER_SPRITE_HEIGHT;
+
+            Rectangle destRect = {
+                player.x,
+                player.y,
+                PLAYER_SPRITE_WIDTH  * scaleX,
+                PLAYER_SPRITE_HEIGHT * scaleY
+            };
+
+            Vector2 origin = { destRect.width / 2.0f, destRect.height / 2.0f };
+
+            DrawTexturePro(currentTexture, sourceRect, destRect, origin, 0.0f, WHITE);
+        }
+        //SPRITE
 
         for(auto& estructura : estructuras) {
             if(estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
@@ -336,6 +451,7 @@ void MainGameState::render()
 
     EndDrawing();
 }
+
 
 void generarEstructura(std::deque<Estructura>& estructuras, float x, float y, float width, float height) {
     Estructura estructura;

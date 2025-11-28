@@ -120,4 +120,25 @@ class MainGameState : public GameState
         float ultimoY = -200; // Posición Y de primera plataforma generada
 
         bool primerFrame = true;
+
+        //SPRITE
+        // Texturas y animación del personaje (mono)
+        Texture2D playerIdleTexture = {0};
+        Texture2D playerRunTexture  = {0};
+        Texture2D playerJumpTexture = {0};
+
+        enum PlayerAnimState { PLAYER_IDLE, PLAYER_RUN, PLAYER_JUMP };
+        PlayerAnimState playerAnimState = PLAYER_IDLE;
+
+        int   playerCurrentFrame = 0;
+        float playerFrameTimer   = 0.0f;
+        float playerFrameSpeed   = 12.0f; // fps de la animación
+        bool  playerFacingRight  = true;
+
+        static constexpr int PLAYER_SPRITE_WIDTH  = 32;
+        static constexpr int PLAYER_SPRITE_HEIGHT = 32;
+        static constexpr int PLAYER_IDLE_FRAMES   = 18;
+        static constexpr int PLAYER_RUN_FRAMES    = 8;
+        static constexpr int PLAYER_JUMP_FRAMES   = 4;
+        //SPRITE
 };
