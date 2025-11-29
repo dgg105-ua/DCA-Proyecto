@@ -274,8 +274,6 @@ void MainGameState::render()
 
     BeginMode2D(camera);
 
-        DrawRectangleRec(player.boundingBox, RED);
-
         //SPRITE
         // Dibujar el personaje con sprites (Idle / Run / Jump)
         {
