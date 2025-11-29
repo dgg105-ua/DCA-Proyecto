@@ -1,5 +1,6 @@
+id: com.sector8.ProjectPrime8
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
+runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
 command: ProjectPrime8
 
@@ -9,6 +10,7 @@ finish-args:
  - --socket=pulseaudio
  - --device=dri
  - --share=ipc
+ - --talk-name=org.freedesktop.portal.Desktop
  
 modules:
  - name: ProjectPrime8
