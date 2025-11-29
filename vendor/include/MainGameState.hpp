@@ -19,7 +19,7 @@ struct Player{
 
     // Mecanicas de salto
     float jumpBufferTime = 0.0f;    // Buffer de salto: Permite saltar un poco antes de tocar el suelo
-    float coyoteTime = 0.0f;    // Tiempo de coyote: Permite saltar un poco después de haber salido del suelo
+    float coyoteTime = 0.0f;        // Tiempo de coyote: Permite saltar un poco después de haber salido del suelo
 };
 
 struct Estructura{
@@ -122,23 +122,28 @@ class MainGameState : public GameState
         bool primerFrame = true;
 
         //SPRITE
-        // Texturas y animación del personaje (mono)
-        Texture2D playerIdleTexture = {0};
-        Texture2D playerRunTexture  = {0};
-        Texture2D playerJumpTexture = {0};
+        // Texturas del personaje (sprites) – se obtienen a través del ResourceManager
+        Texture2D playerIdleTexture{};
+        Texture2D playerRunTexture{};
+        Texture2D playerJumpTexture{};
 
+        // Fuente para el HUD (puntuación, etc.) – también gestionada por el ResourceManager
+        Font uiFont{};
+
+        // Estado de animación del jugador
         enum PlayerAnimState { PLAYER_IDLE, PLAYER_RUN, PLAYER_JUMP };
         PlayerAnimState playerAnimState = PLAYER_IDLE;
 
         int   playerCurrentFrame = 0;
         float playerFrameTimer   = 0.0f;
-        float playerFrameSpeed   = 12.0f; // fps de la animación
+        float playerFrameSpeed   = 12.0f; // fps de animación
         bool  playerFacingRight  = true;
 
-        static constexpr int PLAYER_SPRITE_WIDTH  = 32;
-        static constexpr int PLAYER_SPRITE_HEIGHT = 32;
-        static constexpr int PLAYER_IDLE_FRAMES   = 18;
-        static constexpr int PLAYER_RUN_FRAMES    = 8;
-        static constexpr int PLAYER_JUMP_FRAMES   = 4;
+        // Tamaño de cada frame en el spritesheet (32x32) y número de frames
+        static constexpr int PLAYER_SPRITE_W     = 32;
+        static constexpr int PLAYER_SPRITE_H     = 32;
+        static constexpr int PLAYER_IDLE_FRAMES  = 18; // 576 / 32
+        static constexpr int PLAYER_RUN_FRAMES   = 8;  // 256 / 32
+        static constexpr int PLAYER_JUMP_FRAMES  = 4;  // 128 / 32
         //SPRITE
 };

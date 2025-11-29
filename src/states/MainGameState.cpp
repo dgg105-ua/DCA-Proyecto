@@ -2,6 +2,9 @@
 #include <iostream>
 #include <GameOverState.hpp>
 #include <cmath>
+//SPRITE
+#include <ResourceManager.hpp>
+//SPRITE
 
 MainGameState::MainGameState()
 {
@@ -99,40 +102,27 @@ void MainGameState::init()
     }
 
     const char* DOUBLE_CANDIDATES[] = { "assets/double.png", "src/assets/double.png" };
-        for (const char* p : DOUBLE_CANDIDATES) {
-            if (FileExists(p)) { hudDoubleTex = LoadTexture(p); hudDoubleLoaded = (hudDoubleTex.id != 0); break; }
-        }
+    for (const char* p : DOUBLE_CANDIDATES) {
+        if (FileExists(p)) { hudDoubleTex = LoadTexture(p); hudDoubleLoaded = (hudDoubleTex.id != 0); break; }
+    }
 
     //SPRITE
-    // Carga de los sprites del personaje (Idle, Run, Jump)
-    const char* PLAYER_IDLE_CANDIDATES[] = {
-        "assets/img/player/Idle.png",
-        "assets/Idle.png"
-    };
-    const char* PLAYER_RUN_CANDIDATES[] = {
-        "assets/img/player/Run.png",
-        "assets/Run.png"
-    };
-    const char* PLAYER_JUMP_CANDIDATES[] = {
-        "assets/img/player/Jump.png",
-        "assets/Jump.png"
-    };
+    // Cargar sprites del personaje (Idle, Run, Jump) a través del gestor de recursos
+    ResourceManager& rm = ResourceManager::instance();
 
-    for (const char* p : PLAYER_IDLE_CANDIDATES) {
-        if (FileExists(p)) { playerIdleTexture = LoadTexture(p); break; }
-    }
-    for (const char* p : PLAYER_RUN_CANDIDATES) {
-        if (FileExists(p)) { playerRunTexture = LoadTexture(p); break; }
-    }
-    for (const char* p : PLAYER_JUMP_CANDIDATES) {
-        if (FileExists(p)) { playerJumpTexture = LoadTexture(p); break; }
-    }
+    playerIdleTexture = rm.getTexture("assets/img/player/Idle.png");
+    playerRunTexture  = rm.getTexture("assets/img/player/Run.png");
+    playerJumpTexture = rm.getTexture("assets/img/player/Jump.png");
 
-    playerAnimState   = PLAYER_IDLE;
+    // Inicializar estado de animación del jugador
+    playerAnimState    = PLAYER_IDLE;
     playerCurrentFrame = 0;
     playerFrameTimer   = 0.0f;
-    playerFrameSpeed   = 12.0f;  // fps
+    playerFrameSpeed   = 12.0f;
     playerFacingRight  = true;
+
+    // Fuente para HUD (puntuación, etc.), también gestionada por ResourceManager
+    uiFont = rm.getFont("assets/fonts/ui.ttf");
     //SPRITE
 }
 
@@ -229,19 +219,23 @@ void MainGameState::update(float deltaTime)
     gestionarDoublePU(doublePU, player, dt, doubleSpawnTimer, doubleSpawnInterval,doubleActive, doubleTimeLeft, doubleDuration, puntuacionX);
 
     if (doubleActive) {
-    doubleTimeLeft -= deltaTime;
-    if (doubleTimeLeft <= 0.0f) {
-        doubleActive = false;
-        doubleTimeLeft = 0.0f;
-        puntuacionX = 1.0f;
+        doubleTimeLeft -= deltaTime;
+        if (doubleTimeLeft <= 0.0f) {
+            doubleActive = false;
+            doubleTimeLeft = 0.0f;
+            puntuacionX = 1.0f;
+        }
     }
-}
 
     //SPRITE
-    // Actualización del estado de animación del jugador
+    // --- Lógica de animación del jugador en función de su estado físico ---
+
+    // Estado: suelo / aire
     if (!enSuelo) {
+        // Jugador en el aire -> animación de salto
         playerAnimState = PLAYER_JUMP;
     } else {
+        // Jugador en el suelo -> idle o correr
         bool moviendo = IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
         playerAnimState = moviendo ? PLAYER_RUN : PLAYER_IDLE;
     }
@@ -253,7 +247,7 @@ void MainGameState::update(float deltaTime)
         playerFacingRight = true;
     }
 
-    // Avance de frames de animación
+    // Avance de los frames de animación
     playerFrameTimer += dt;
     int maxFrames = 1;
     switch (playerAnimState) {
@@ -261,7 +255,6 @@ void MainGameState::update(float deltaTime)
         case PLAYER_RUN:  maxFrames = PLAYER_RUN_FRAMES;  break;
         case PLAYER_JUMP: maxFrames = PLAYER_JUMP_FRAMES; break;
     }
-
     if (maxFrames <= 0) maxFrames = 1;
 
     if (playerFrameTimer >= 1.0f / playerFrameSpeed) {
@@ -284,10 +277,10 @@ void MainGameState::render()
         DrawRectangleRec(player.boundingBox, RED);
 
         //SPRITE
-        // Dibujar al jugador con los sprites si se han cargado
-        if (playerIdleTexture.id != 0) {
-            Texture2D currentTexture;
-            int maxFrames = 1;
+        // Dibujar el personaje con sprites (Idle / Run / Jump)
+        {
+            Texture2D currentTexture = playerIdleTexture;
+            int maxFrames = PLAYER_IDLE_FRAMES;
 
             switch (playerAnimState) {
                 case PLAYER_IDLE:
@@ -295,11 +288,11 @@ void MainGameState::render()
                     maxFrames = PLAYER_IDLE_FRAMES;
                     break;
                 case PLAYER_RUN:
-                    currentTexture = playerRunTexture.id != 0 ? playerRunTexture : playerIdleTexture;
+                    currentTexture = (playerRunTexture.id != 0) ? playerRunTexture : playerIdleTexture;
                     maxFrames = (playerRunTexture.id != 0) ? PLAYER_RUN_FRAMES : PLAYER_IDLE_FRAMES;
                     break;
                 case PLAYER_JUMP:
-                    currentTexture = playerJumpTexture.id != 0 ? playerJumpTexture : playerIdleTexture;
+                    currentTexture = (playerJumpTexture.id != 0) ? playerJumpTexture : playerIdleTexture;
                     maxFrames = (playerJumpTexture.id != 0) ? PLAYER_JUMP_FRAMES : PLAYER_IDLE_FRAMES;
                     break;
             }
@@ -308,21 +301,21 @@ void MainGameState::render()
             int frameIndex = playerCurrentFrame % maxFrames;
 
             Rectangle sourceRect = {
-                (float)(frameIndex * PLAYER_SPRITE_WIDTH),
+                (float)(frameIndex * PLAYER_SPRITE_W),
                 0.0f,
-                playerFacingRight ? (float)PLAYER_SPRITE_WIDTH : -(float)PLAYER_SPRITE_WIDTH,
-                (float)PLAYER_SPRITE_HEIGHT
+                playerFacingRight ? (float)PLAYER_SPRITE_W : -(float)PLAYER_SPRITE_W,
+                (float)PLAYER_SPRITE_H
             };
 
-            // Escalamos el sprite para que coincida más o menos con la hitbox
-            float scaleX = player.width  / (float)PLAYER_SPRITE_WIDTH;
-            float scaleY = player.height / (float)PLAYER_SPRITE_HEIGHT;
+            // Escalamos el sprite para aproximarlo al tamaño de la hitbox
+            float scaleX = player.width  / (float)PLAYER_SPRITE_W;
+            float scaleY = player.height / (float)PLAYER_SPRITE_H;
 
             Rectangle destRect = {
                 player.x,
                 player.y,
-                PLAYER_SPRITE_WIDTH  * scaleX,
-                PLAYER_SPRITE_HEIGHT * scaleY
+                PLAYER_SPRITE_W * scaleX,
+                PLAYER_SPRITE_H * scaleY
             };
 
             Vector2 origin = { destRect.width / 2.0f, destRect.height / 2.0f };
@@ -364,10 +357,17 @@ void MainGameState::render()
             DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
         }
 
-        DrawText(TextFormat("Puntuacion: %d", (int)puntuacion),
-                 (int)(camera.target.x - camera.offset.x + 10),
-                 (int)(camera.target.y - camera.offset.y + 10),
-                 24, BLACK);
+        //SPRITE
+        // Puntuación usando la fuente gestionada por el ResourceManager
+        {
+            const char* scoreText = TextFormat("Puntuacion: %d", (int)puntuacion);
+            Vector2 scorePos = {
+                camera.target.x - camera.offset.x + 10.0f,
+                camera.target.y - camera.offset.y + 10.0f
+            };
+            DrawTextEx(uiFont, scoreText, scorePos, 24.0f, 1.0f, BLACK);
+        }
+        //SPRITE
 
         if (ufo.active) {
             DrawEllipse(ufo.x, ufo.y, 40, 14, GRAY);
@@ -451,7 +451,6 @@ void MainGameState::render()
 
     EndDrawing();
 }
-
 
 void generarEstructura(std::deque<Estructura>& estructuras, float x, float y, float width, float height) {
     Estructura estructura;
