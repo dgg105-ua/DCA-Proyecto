@@ -25,4 +25,14 @@ class MainMenuState : public GameState
         int selectedOption;
         Rectangle playButton;
         Rectangle exitButton;
+
+        //SPRITE
+        // Texturas del menú (se cargan vía ResourceManager)
+        Texture2D menuBackgroundTex{};
+        Texture2D playButtonTex{};
+        Texture2D exitButtonTex{};
+
+        // Fuente para el título del juego
+        Font uiFont{};
+        //SPRITE
 };

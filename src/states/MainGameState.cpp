@@ -80,9 +80,25 @@ void MainGameState::init()
     powerUpSpawnTimer = 0.0f;
     powerUpSpawnInterval = GetRandomValue(5, 8);
 
-    generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);
-    generarEstructura(estructuras, 0, -10000, 80, 10000);
-    generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000);
+    //SPRITE_MAP  <-- CENTRAR MAPA HORIZONTALMENTE
+
+    // Ancho "jugable" (corredor) = 80% de la pantalla
+    float worldWidth  = GetScreenWidth() * 0.80f;
+    float marginX     = (GetScreenWidth() - worldWidth) / 2.0f;  // margen a izquierda y derecha
+    float wallWidth   = 80.0f;
+    float floorHeight = 50.0f;
+
+    // Suelo centrado
+    generarEstructura(estructuras, marginX, -50, worldWidth, floorHeight);
+
+    // Pared izquierda centrada respecto al corredor
+    generarEstructura(estructuras, marginX, -10000, wallWidth, 10000);
+
+    // Pared derecha centrada respecto al corredor
+    generarEstructura(estructuras, marginX + worldWidth - wallWidth, -10000, wallWidth, 10000);
+
+    //SPRITE_MAP
+
 
     float hudSize = 48.0f;
     float margin = 10.0f;
