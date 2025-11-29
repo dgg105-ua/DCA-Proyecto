@@ -7,7 +7,7 @@ SRC_DIRS = src/core src/states
 OBJ_DIR = obj
 TARGET = ProjectPrime8
 
-PREFIX ?= ./usr# Sin el punto se instalaría en /usr del sistema, lo que requiere permisos de root
+PREFIX ?= /usr# Sin el punto se instalaría en /usr del sistema, lo que requiere permisos de root
 DESTDIR ?= 
 
 SRCS = $(wildcard $(addsuffix /*.cpp, $(SRC_DIRS)))

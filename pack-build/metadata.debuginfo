@@ -1,0 +1,5 @@
+[Runtime]
+name=com.sector8.ProjectPrime8.Debug
+
+[ExtensionOf]
+ref=app/com.sector8.ProjectPrime8/x86_64/master

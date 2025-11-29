@@ -1,0 +1,19 @@
+[Application]
+name=com.sector8.ProjectPrime8
+runtime=org.freedesktop.Platform/x86_64/24.08
+sdk=org.freedesktop.Sdk/x86_64/24.08
+command=ProjectPrime8
+
+[Context]
+shared=network;ipc;
+sockets=x11;wayland;pulseaudio;fallback-x11;
+devices=dri;
+filesystems=home;
+
+[Extension com.sector8.ProjectPrime8.Debug]
+directory=lib/debug
+autodelete=true
+no-autodownload=true
+
+[Build]
+built-extensions=com.sector8.ProjectPrime8.Debug;

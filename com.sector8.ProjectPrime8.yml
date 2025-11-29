@@ -10,7 +10,8 @@ finish-args:
  - --socket=pulseaudio
  - --device=dri
  - --share=ipc
- - --talk-name=org.freedesktop.portal.Desktop
+ - --share=network
+ - --filesystem=home
  
 modules:
  - name: ProjectPrime8

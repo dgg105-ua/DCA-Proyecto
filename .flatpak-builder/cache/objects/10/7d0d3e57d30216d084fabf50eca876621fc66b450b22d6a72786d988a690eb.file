@@ -1,0 +1,34 @@
+{
+  "id" : "com.sector8.ProjectPrime8",
+  "runtime" : "org.freedesktop.Platform",
+  "runtime-version" : "24.08",
+  "runtime-commit" : "5365bb0e377aa4dc0ebb3ddbc5af846eb1cfa9222146754997d615b6c8c63f0b",
+  "sdk" : "org.freedesktop.Sdk",
+  "sdk-commit" : "9ca9e4d490ad7057eb2d37461c8e7d977a720b85946f603c5a4ddc0aa9207230",
+  "command" : "ProjectPrime8",
+  "modules" : [
+    {
+      "name" : "ProjectPrime8",
+      "buildsystem" : "simple",
+      "sources" : [
+        {
+          "path" : ".",
+          "type" : "dir"
+        }
+      ],
+      "build-commands" : [
+        "make",
+        "make install PREFIX=/app"
+      ]
+    }
+  ],
+  "finish-args" : [
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--socket=pulseaudio",
+    "--device=dri",
+    "--share=ipc",
+    "--share=network",
+    "--filesystem=home"
+  ]
+}
