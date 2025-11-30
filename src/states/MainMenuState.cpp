@@ -148,7 +148,7 @@ void MainMenuState::render()
 
         //SPRITE
         // Título del juego usando la fuente cargada
-        const char* title = "SALTA BINNY";
+        const char* title = "Project Prime-8";
         float titleFontSize = 64.0f;
         float titleSpacing  = 2.0f;
 
