@@ -2,15 +2,13 @@
 #include <iostream>
 #include <StateMachine.hpp>
 #include <MainGameState.hpp>
+#include <ResourceManager.hpp>
 using namespace std;
 
 extern "C" {
     #include <raylib.h>
 }
 
-//SPRITE
-#include <ResourceManager.hpp>
-//SPRITE
 
 MainMenuState::MainMenuState() : selectedOption(0)
 {
@@ -18,23 +16,22 @@ MainMenuState::MainMenuState() : selectedOption(0)
 
 void MainMenuState::init()
 {
-    //SPRITE
+    //sprites
     // Cargar recursos gráficos del menú con el gestor de recursos
     ResourceManager& rm = ResourceManager::instance();
 
     // Fondo del menú
     menuBackgroundTex = rm.getTexture("assets/img/menu/menu_background.png");
 
-    // Botones (imágenes con el texto PLAY y EXIT)
+    // Botones exit y play (imagenes)
     playButtonTex = rm.getTexture("assets/img/menu/Play Button.png");
     exitButtonTex = rm.getTexture("assets/img/menu/Exit Button.png");
 
     // Fuente para el título del juego
     uiFont = rm.getFont("assets/fonts/ui.ttf");
-    //SPRITE
 
-    //SPRITE
-    // Tamaños REALES de cada sprite de botón
+
+    // Tamaños botones
     float playW  = (playButtonTex.id != 0) ? (float)playButtonTex.width  : 400.0f;
     float playH  = (playButtonTex.id != 0) ? (float)playButtonTex.height : 100.0f;
     float exitW  = (exitButtonTex.id != 0) ? (float)exitButtonTex.width  : playW;
@@ -45,7 +42,7 @@ void MainMenuState::init()
 
     float spacing = 20.0f; // separación vertical entre botones
 
-    // Rectángulo clicable del botón PLAY = exactamente el tamaño del sprite
+    // sprite play tamaño boton
     playButton = {
         (screenW - playW) / 2.0f,
         (screenH - (playH + spacing + exitH)) / 2.0f,
@@ -53,14 +50,14 @@ void MainMenuState::init()
         playH
     };
 
-    // Rectángulo clicable del botón EXIT = tamaño del sprite EXIT
+    // sprite exit tamaño boton
     exitButton = {
         (screenW - exitW) / 2.0f,
         playButton.y + playButton.height + spacing,
         exitW,
         exitH
     };
-    //SPRITE
+    //sprites
 }
 
 void MainMenuState::loadBackground()
@@ -129,8 +126,8 @@ void MainMenuState::render()
 {
     BeginDrawing();
 
-        //SPRITE
-        // Fondo del menú estirado exactamente a la ventana
+        //sprites
+        // fondo del menu
         ClearBackground(BLACK);
         if (menuBackgroundTex.id != 0) {
             float texW    = (float)menuBackgroundTex.width;
@@ -144,10 +141,6 @@ void MainMenuState::render()
 
             DrawTexturePro(menuBackgroundTex, src, dst, origin, 0.0f, WHITE);
         }
-        //SPRITE
-
-        //SPRITE
-        // Título del juego usando la fuente cargada
         const char* title = "Project Prime-8";
         float titleFontSize = 64.0f;
         float titleSpacing  = 2.0f;
@@ -158,10 +151,9 @@ void MainMenuState::render()
             GetScreenHeight() * 0.18f
         };
         DrawTextEx(uiFont, title, titlePos, titleFontSize, titleSpacing, RAYWHITE);
-        //SPRITE
 
-        //SPRITE
-        // Dibujar botones: el sprite completo, 1:1, y su rectángulo es el área clicable
+
+        // botones dibujados
         Vector2 mousePos = GetMousePosition();
         bool playHover = CheckCollisionPointRec(mousePos, playButton);
         bool exitHover = CheckCollisionPointRec(mousePos, exitButton);
@@ -192,7 +184,7 @@ void MainMenuState::render()
                      exitButton.y + (exitButton.height - 20) / 2,
                      20, WHITE);
         }
-        //SPRITE
+        //sprites
 
     EndDrawing();
 }
