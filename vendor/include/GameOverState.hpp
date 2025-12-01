@@ -26,4 +26,12 @@ class GameOverState : public GameState
         int selectedOption = 0;
         Rectangle playAgainButton;
         Rectangle returnToMenuButton;
+
+        //SPRITE
+        // Recursos gráficos del Game Over
+        Texture2D goBackgroundTex{};
+        Texture2D newGameButtonTex{};
+        Texture2D menuButtonTex{};
+        Font uiFont{};
+        //SPRITE
 };

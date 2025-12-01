@@ -142,7 +142,7 @@ void MainMenuState::render()
             DrawTexturePro(menuBackgroundTex, src, dst, origin, 0.0f, WHITE);
         }
         const char* title = "Project Prime-8";
-        float titleFontSize = 64.0f;
+        float titleFontSize = 84.0f;
         float titleSpacing  = 2.0f;
 
         Vector2 titleSize = MeasureTextEx(uiFont, title, titleFontSize, titleSpacing);

@@ -88,16 +88,12 @@ void MainGameState::init()
     float wallWidth   = 80.0f;
     float floorHeight = 50.0f;
 
-    // Suelo centrado
-    generarEstructura(estructuras, marginX, -50, worldWidth, floorHeight);
-
-    // Pared izquierda centrada respecto al corredor
-    generarEstructura(estructuras, marginX, -10000, wallWidth, 10000);
-
-    // Pared derecha centrada respecto al corredor
-    generarEstructura(estructuras, marginX + worldWidth - wallWidth, -10000, wallWidth, 10000);
+    generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);              // suelo
+    generarEstructura(estructuras, 0, -10000, 80, 10000);                      // pared izquierda
+    generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000);    // pared derecha
 
     //SPRITE_MAP
+
 
 
     float hudSize = 48.0f;
