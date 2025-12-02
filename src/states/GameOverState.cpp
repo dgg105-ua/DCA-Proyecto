@@ -3,15 +3,14 @@
 #include <MainGameState.hpp>
 #include <MainMenuState.hpp>
 #include <StateMachine.hpp>
+#include <ResourceManager.hpp>
 using namespace std;
 
 extern "C" {
     #include <raylib.h>
 }
 
-//SPRITE
-#include <ResourceManager.hpp>
-//SPRITE
+
 
 GameOverState::GameOverState() : selectedOption(0)
 {
@@ -19,7 +18,7 @@ GameOverState::GameOverState() : selectedOption(0)
 
 void GameOverState::init()
 {
-    //SPRITE
+    //sprites
     // Cargar recursos gráficos del Game Over con el gestor de recursos
     ResourceManager& rm = ResourceManager::instance();
 
@@ -27,10 +26,8 @@ void GameOverState::init()
     newGameButtonTex  = rm.getTexture("assets/img/gameover/New game Button.png");
     menuButtonTex     = rm.getTexture("assets/img/gameover/Menu Button.png");
     uiFont            = rm.getFont("assets/fonts/ui.ttf");
-    //SPRITE
 
-    //SPRITE
-    // Usar el tamaño REAL de cada sprite de botón
+    // sprite = tamaño del boton
     float newW  = (newGameButtonTex.id != 0) ? (float)newGameButtonTex.width  : 250.0f;
     float newH  = (newGameButtonTex.id != 0) ? (float)newGameButtonTex.height : 50.0f;
     float menuW = (menuButtonTex.id    != 0) ? (float)menuButtonTex.width    : newW;
@@ -41,17 +38,18 @@ void GameOverState::init()
 
     playAgainButton = {
         (screenW - newW) / 2.0f,
-        screenH * 0.45f - newH / 2.0f,   // antes 0.50 → más arriba
+        screenH * 0.45f - newH / 2.0f,
         newW,
         newH
     };
 
     returnToMenuButton = {
         (screenW - menuW) / 2.0f,
-        screenH * 0.65f - menuH / 2.0f,  // antes 0.70 → más arriba
+        screenH * 0.65f - menuH / 2.0f,
         menuW,
         menuH
     };
+    //sprites
 
 }
 
@@ -120,8 +118,8 @@ void GameOverState::render()
 {
     BeginDrawing();
 
-        //SPRITE
-        // Fondo del Game Over estirado a toda la ventana
+        //sprites
+        // Fondo del Game Over
         ClearBackground(BLACK);
         if (goBackgroundTex.id != 0) {
             float texW    = (float)goBackgroundTex.width;
@@ -135,17 +133,15 @@ void GameOverState::render()
 
             DrawTexturePro(goBackgroundTex, src, dst, origin, 0.0f, WHITE);
         }
-        //SPRITE
-        
-        //SPRITE
-        // Título "GAME OVER" y puntuación con la fuente del menú (un poco más arriba)
+
+        // Título y puntuación
         const char* gameOverText = "GAME OVER";
         float titleFontSize = 72.0f;
         float titleSpacing  = 2.0f;
         Vector2 titleSize = MeasureTextEx(uiFont, gameOverText, titleFontSize, titleSpacing);
         Vector2 titlePos  = {
             (GetScreenWidth()  - titleSize.x) / 2.0f,
-            GetScreenHeight() * 0.12f        // antes 0.18 → más arriba
+            GetScreenHeight() * 0.12f
         };
         DrawTextEx(uiFont, gameOverText, titlePos, titleFontSize, titleSpacing, RAYWHITE);
 
@@ -156,13 +152,11 @@ void GameOverState::render()
         Vector2 scoreSize = MeasureTextEx(uiFont, scoreText, scoreFontSize, scoreSpacing);
         Vector2 scorePos  = {
             (GetScreenWidth()  - scoreSize.x) / 2.0f,
-            titlePos.y + titleSize.y + 20.0f   // un poquito más cerca del título
+            titlePos.y + titleSize.y + 20.0f
         };
         DrawTextEx(uiFont, scoreText, scorePos, scoreFontSize, scoreSpacing, RAYWHITE);
-        //SPRITE
 
-        //SPRITE
-        // Botón NEW GAME (Play Again)
+        // Botón NEW GAME
         Vector2 mousePos = GetMousePosition();
         bool newHover  = CheckCollisionPointRec(mousePos, playAgainButton);
         bool menuHover = CheckCollisionPointRec(mousePos, returnToMenuButton);
@@ -183,7 +177,7 @@ void GameOverState::render()
                      20, WHITE);
         }
 
-        // Botón MENU (Return to Menu)
+        // Botón MENU 
         if (menuButtonTex.id != 0) {
             Rectangle srcMenu = { 0.0f, 0.0f, (float)menuButtonTex.width, (float)menuButtonTex.height };
             Rectangle dstMenu = { returnToMenuButton.x, returnToMenuButton.y, returnToMenuButton.width, returnToMenuButton.height };
@@ -196,7 +190,7 @@ void GameOverState::render()
                      returnToMenuButton.y + (returnToMenuButton.height - 20) / 2,
                      20, WHITE);
         }
-        //SPRITE
+        //sprites
 
     EndDrawing();
 }

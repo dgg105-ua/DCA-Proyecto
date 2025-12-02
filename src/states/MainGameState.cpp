@@ -80,21 +80,17 @@ void MainGameState::init()
     powerUpSpawnTimer = 0.0f;
     powerUpSpawnInterval = GetRandomValue(5, 8);
 
-    //SPRITE_MAP  <-- CENTRAR MAPA HORIZONTALMENTE
-
-    // Ancho "jugable" (corredor) = 80% de la pantalla
+    //SPRITE_MAP  <-- (variables antiguas, sin uso ahora mismo)
     float worldWidth  = GetScreenWidth() * 0.80f;
-    float marginX     = (GetScreenWidth() - worldWidth) / 2.0f;  // margen a izquierda y derecha
+    float marginX     = (GetScreenWidth() - worldWidth) / 2.0f;
     float wallWidth   = 80.0f;
     float floorHeight = 50.0f;
 
+    // Mapa original, ancho completo
     generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);              // suelo
     generarEstructura(estructuras, 0, -10000, 80, 10000);                      // pared izquierda
     generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000);    // pared derecha
-
     //SPRITE_MAP
-
-
 
     float hudSize = 48.0f;
     float margin = 10.0f;
@@ -119,12 +115,17 @@ void MainGameState::init()
     }
 
     //SPRITE
-    // Cargar sprites del personaje (Idle, Run, Jump) a través del gestor de recursos
+    // Cargar sprites del personaje (Idle, Run, Jump) y de plataformas a través del gestor de recursos (singleton)
     ResourceManager& rm = ResourceManager::instance();
 
+    // Personaje
     playerIdleTexture = rm.getTexture("assets/img/player/Idle.png");
     playerRunTexture  = rm.getTexture("assets/img/player/Run.png");
     playerJumpTexture = rm.getTexture("assets/img/player/Jump.png");
+
+    // Plataforma: imagen recortada de la losa de suelo/plataforma
+    // (ajusta la ruta si la has guardado en otra carpeta)
+    platformTexture   = rm.getTexture("assets/img/world/platform.png");
 
     // Inicializar estado de animación del jugador
     playerAnimState    = PLAYER_IDLE;
@@ -334,16 +335,45 @@ void MainGameState::render()
         }
         //SPRITE
 
-        for(auto& estructura : estructuras) {
-            if(estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
-               estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200) {
-                DrawRectangleRec(estructura.rect, GRAY);
-            }
-            else if (estructura.rect.y < camera.target.y &&
-                     estructura.rect.y + estructura.rect.height > camera.target.y) {
-                DrawRectangleRec(estructura.rect, GRAY);
+        //SPRITE
+        // Dibujar estructuras (plataformas y paredes). 
+        // Las plataformas y el suelo (rectángulos bajos) usan sprite; las paredes altas se dejan en GRAY.
+        for (auto& estructura : estructuras) {
+            bool visible =
+                (estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
+                 estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200) ||
+                (estructura.rect.y < camera.target.y &&
+                 estructura.rect.y + estructura.rect.height > camera.target.y);
+
+            if (!visible) continue;
+
+            Rectangle r = estructura.rect;
+
+            // Si tenemos textura de plataforma y la estructura es "baja" (plataformas / suelo),
+            // ajustamos el sprite al tamaño completo del rectángulo.
+            if (platformTexture.id != 0 && r.height <= 60.0f) {
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)platformTexture.width,
+                    (float)platformTexture.height
+                };
+
+                Rectangle dst = {
+                    r.x,
+                    r.y,
+                    r.width,
+                    r.height
+                };
+
+                Vector2 origin = { 0.0f, 0.0f };
+                DrawTexturePro(platformTexture, src, dst, origin, 0.0f, WHITE);
+            } else {
+                // Paredes laterales u otras estructuras altas
+                DrawRectangleRec(r, GRAY);
             }
         }
+        //SPRITE
 
         DrawRectangleRec(lava.rect, ORANGE);
 

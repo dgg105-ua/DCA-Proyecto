@@ -121,13 +121,16 @@ class MainGameState : public GameState
 
         bool primerFrame = true;
 
-        //SPRITE
-        // Texturas del personaje (sprites) – se obtienen a través del ResourceManager
+        //sprites
+        // Texturas del personaje a través del ResourceManager
         Texture2D playerIdleTexture{};
         Texture2D playerRunTexture{};
         Texture2D playerJumpTexture{};
 
-        // Fuente para el HUD (puntuación, etc.) – también gestionada por el ResourceManager
+        // Textura de las plataformas
+        Texture2D platformTexture{};
+
+        // Fuente para el HUD gestionada por el ResourceManager
         Font uiFont{};
 
         // Estado de animación del jugador
@@ -136,14 +139,14 @@ class MainGameState : public GameState
 
         int   playerCurrentFrame = 0;
         float playerFrameTimer   = 0.0f;
-        float playerFrameSpeed   = 12.0f; // fps de animación
+        float playerFrameSpeed   = 12.0f;
         bool  playerFacingRight  = true;
 
-        // Tamaño de cada frame en el spritesheet (32x32) y número de frames
+        // Tamaño de cada frame en el spritesheet y número de frames
         static constexpr int PLAYER_SPRITE_W     = 32;
         static constexpr int PLAYER_SPRITE_H     = 32;
-        static constexpr int PLAYER_IDLE_FRAMES  = 18; // 576 / 32
-        static constexpr int PLAYER_RUN_FRAMES   = 8;  // 256 / 32
-        static constexpr int PLAYER_JUMP_FRAMES  = 4;  // 128 / 32
-        //SPRITE
+        static constexpr int PLAYER_IDLE_FRAMES  = 18;
+        static constexpr int PLAYER_RUN_FRAMES   = 8;
+        static constexpr int PLAYER_JUMP_FRAMES  = 4;
+        //sprites
 };

@@ -26,13 +26,13 @@ class MainMenuState : public GameState
         Rectangle playButton;
         Rectangle exitButton;
 
-        //SPRITE
-        // Texturas del menú (se cargan vía ResourceManager)
+        //sprites
+        // Texturas del menú cargadas po ResourceManager
         Texture2D menuBackgroundTex{};
         Texture2D playButtonTex{};
         Texture2D exitButtonTex{};
 
         // Fuente para el título del juego
         Font uiFont{};
-        //SPRITE
+        //sprites
 };

@@ -27,11 +27,10 @@ class GameOverState : public GameState
         Rectangle playAgainButton;
         Rectangle returnToMenuButton;
 
-        //SPRITE
-        // Recursos gráficos del Game Over
+        //sprites
         Texture2D goBackgroundTex{};
         Texture2D newGameButtonTex{};
         Texture2D menuButtonTex{};
         Font uiFont{};
-        //SPRITE
+        //sprites
 };
