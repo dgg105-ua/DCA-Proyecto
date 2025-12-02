@@ -336,8 +336,7 @@ void MainGameState::render()
         //SPRITE
 
         //SPRITE
-        // Dibujar estructuras (plataformas y paredes). 
-        // Las plataformas y el suelo (rectángulos bajos) usan sprite; las paredes altas se dejan en GRAY.
+        // Dibujar estructuras (plataformas, suelo y paredes).
         for (auto& estructura : estructuras) {
             bool visible =
                 (estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
@@ -349,9 +348,58 @@ void MainGameState::render()
 
             Rectangle r = estructura.rect;
 
-            // Si tenemos textura de plataforma y la estructura es "baja" (plataformas / suelo),
-            // ajustamos el sprite al tamaño completo del rectángulo.
-            if (platformTexture.id != 0 && r.height <= 60.0f) {
+            // El suelo es la primera estructura que se genera:
+            // generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);
+            bool isFloor = (&estructura == &estructuras.front());
+
+            if (isFloor) {
+                // --- Sprite del suelo, obtenido desde el ResourceManager (singleton) ---
+                ResourceManager& rm = ResourceManager::instance();
+                Texture2D floorTexture = rm.getTexture("assets/img/world/floor.png");
+
+                if (floorTexture.id != 0) {
+                    // Tilear la textura a lo ancho del suelo
+                    float scale     = r.height / (float)floorTexture.height;
+                    float tileWidth = floorTexture.width * scale;
+                    float startX    = r.x;
+                    float endX      = r.x + r.width;
+
+                    Rectangle srcBase = {
+                        0.0f,
+                        0.0f,
+                        (float)floorTexture.width,
+                        (float)floorTexture.height
+                    };
+
+                    for (float x = startX; x < endX; x += tileWidth) {
+                        float remaining = endX - x;
+                        float drawWidth = tileWidth;
+                        Rectangle src   = srcBase;
+
+                        // Si el último trozo no cabe entero, recortamos la textura
+                        if (remaining < tileWidth) {
+                            float ratio = remaining / tileWidth;
+                            src.width  *= ratio;
+                            drawWidth   = remaining;
+                        }
+
+                        Rectangle dst = {
+                            x + drawWidth / 2.0f,
+                            r.y + r.height / 2.0f,
+                            drawWidth,
+                            r.height
+                        };
+                        Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                        DrawTexturePro(floorTexture, src, dst, origin, 0.0f, WHITE);
+                    }
+                } else {
+                    // Si no se pudo cargar la textura, dibujamos un rectángulo gris como fallback
+                    DrawRectangleRec(r, GRAY);
+                }
+            }
+            else if (platformTexture.id != 0 && r.height <= 60.0f) {
+                // Plataformas (rectángulos bajos) -> sprite de plataforma
                 Rectangle src = {
                     0.0f,
                     0.0f,
@@ -374,6 +422,7 @@ void MainGameState::render()
             }
         }
         //SPRITE
+
 
         DrawRectangleRec(lava.rect, ORANGE);
 
