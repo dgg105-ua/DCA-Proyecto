@@ -2,6 +2,7 @@
 #include <iostream>
 #include <GameOverState.hpp>
 #include <cmath>
+#include <ResourceManager.hpp>
 
 MainGameState::MainGameState()
 {
@@ -28,8 +29,8 @@ void MainGameState::init()
     player.y = -100;
     player.vx = 350.0f;
     player.vy = 0;
-    player.height = 60;
-    player.width = 40;
+    player.height = 80;
+    player.width = 70;
 
     Rectangle boundingBox = {player.x - player.width/2, player.y - player.height/2, player.width, player.height};
     player.boundingBox = boundingBox;
@@ -40,7 +41,7 @@ void MainGameState::init()
     camera.zoom = 1.0f;
 
     lava.vy = 150.0f;
-    Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 1000};
+    Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 500};
     lava.rect = lavaRect;
 
     puntuacion = 0.0f;
@@ -77,6 +78,12 @@ void MainGameState::init()
     powerUpSpawnTimer = 0.0f;
     powerUpSpawnInterval = GetRandomValue(5, 8);
 
+    float worldWidth  = GetScreenWidth() * 0.80f;
+    float marginX     = (GetScreenWidth() - worldWidth) / 2.0f;
+    float wallWidth   = 80.0f;
+    float floorHeight = 50.0f;
+
+    // Mapa original, ancho completo
     generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);
     generarEstructura(estructuras, 0, -10000, 80, 10000);
     generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000);
@@ -88,20 +95,64 @@ void MainGameState::init()
     hudSlowRect   = { screenW - (hudSize*2.0f) - (margin*2.0f), margin, hudSize, hudSize };
     hudDoubleRect = { screenW - (hudSize*3.0f) - (margin*3.0f), margin, hudSize, hudSize };
 
-    const char* SHIELD_CANDIDATES[] = { "assets/shield.png", "src/assets/shield.png" };
+    const char* SHIELD_CANDIDATES[] = {
+        "assets/img/powerupsc/shield.png",
+        "src/assets/img/powerupsc/shield.png"
+    };
     for (const char* p : SHIELD_CANDIDATES) {
         if (FileExists(p)) { hudShieldTex = LoadTexture(p); hudShieldLoaded = (hudShieldTex.id != 0); break; }
     }
 
-    const char* SLOW_CANDIDATES[] = { "assets/slow.png", "src/assets/slow.png" };
+    const char* SLOW_CANDIDATES[] = {
+        "assets/img/powerupsc/slow.png",
+        "src/assets/img/powerupsc/slow.png"
+    };
     for (const char* p : SLOW_CANDIDATES) {
         if (FileExists(p)) { hudSlowTex = LoadTexture(p); hudSlowLoaded = (hudSlowTex.id != 0); break; }
     }
 
-    const char* DOUBLE_CANDIDATES[] = { "assets/double.png", "src/assets/double.png" };
-        for (const char* p : DOUBLE_CANDIDATES) {
-            if (FileExists(p)) { hudDoubleTex = LoadTexture(p); hudDoubleLoaded = (hudDoubleTex.id != 0); break; }
-        }
+    const char* DOUBLE_CANDIDATES[] = {
+        "assets/img/powerupsc/double.png",
+        "src/assets/img/powerupsc/double.png"
+    };
+    for (const char* p : DOUBLE_CANDIDATES) {
+        if (FileExists(p)) { hudDoubleTex = LoadTexture(p); hudDoubleLoaded = (hudDoubleTex.id != 0); break; }
+    }
+
+    //sprites
+    // Cargar sprites a través del gestor de recursos 
+    ResourceManager& rm = ResourceManager::instance();
+
+    // Personaje
+    playerIdleTexture = rm.getTexture("assets/img/player/Idle.png");
+    playerRunTexture  = rm.getTexture("assets/img/player/Run.png");
+    playerJumpTexture = rm.getTexture("assets/img/player/Jump.png");
+
+    // Plataforma
+    platformTexture   = rm.getTexture("assets/img/world/platform.png");
+
+    // Fuente para HUD
+    uiFont = rm.getFont("assets/fonts/ui.ttf");
+
+    // PU
+    jumpPUTexture        = rm.getTexture("assets/img/powerups/jump.png");
+    shieldPUWorldTexture = rm.getTexture("assets/img/powerups/shield.png");
+    slowPUTexture        = rm.getTexture("assets/img/powerups/slow.png");
+    doublePUTexture      = rm.getTexture("assets/img/powerups/double.png");
+
+    // OVNI de rescate
+    ufoTexture = ResourceManager::instance().getTexture("assets/img/world/ufo.png");
+
+    // lava
+    lavaTexture = rm.getTexture("assets/img/world/lava.png");
+
+    // Inicializar estado de animación del jugador
+    playerAnimState    = PLAYER_IDLE;
+    playerCurrentFrame = 0;
+    playerFrameTimer   = 0.0f;
+    playerFrameSpeed   = 8.0f;
+    playerFacingRight  = true;
+    //sprites
 }
 
 void MainGameState::handleInput(){
@@ -122,6 +173,8 @@ void MainGameState::handleInput(float deltaTime)
 
 void MainGameState::update(float deltaTime)
 {
+    if (deltaTime > 0.05f) deltaTime = 0.05f;
+
     puntuacion += deltaTime * puntuacionX;
 
     timeScale = slowActive ? 0.4f : 1.0f;
@@ -161,9 +214,32 @@ void MainGameState::update(float deltaTime)
 
     gestionarLava(dt, lava, player, state_machine, puntuacion, estructuras);
 
+    // lava borra pu y estructuras
+    auto borraSiColisionaConLava = [&](PowerUp& pu) {
+        if (!pu.active) return;
+
+        float r = pu.radius;
+        Rectangle puRect = {
+            pu.x - r,
+            pu.y - r,
+            2.0f * r,
+            2.0f * r
+        };
+
+        if (CheckCollisionRecs(lava.rect, puRect)) {
+            pu.active = false;
+        }
+    };
+
+    borraSiColisionaConLava(powerUp);
+    borraSiColisionaConLava(shieldPU);
+    borraSiColisionaConLava(slowPU);
+    borraSiColisionaConLava(doublePU);
+
     gestionarPowerUp(powerUp, player, dt, powerUpSpawnTimer, powerUpSpawnInterval);
 
     gestionarShieldPU(shieldPU, player, dt, shieldSpawnTimer, shieldSpawnInterval, shieldActive);
+
 
     if (ufo.active) {
         actualizarRescateOVNI(player, dt, this);
@@ -197,14 +273,50 @@ void MainGameState::update(float deltaTime)
     gestionarDoublePU(doublePU, player, dt, doubleSpawnTimer, doubleSpawnInterval,doubleActive, doubleTimeLeft, doubleDuration, puntuacionX);
 
     if (doubleActive) {
-    doubleTimeLeft -= deltaTime;
-    if (doubleTimeLeft <= 0.0f) {
-        doubleActive = false;
-        doubleTimeLeft = 0.0f;
-        puntuacionX = 1.0f;
+        doubleTimeLeft -= deltaTime;
+        if (doubleTimeLeft <= 0.0f) {
+            doubleActive = false;
+            doubleTimeLeft = 0.0f;
+            puntuacionX = 1.0f;
+        }
     }
-}
 
+    //sprites
+    // animación del jugador
+
+    // Estado: suelo / aire
+    if (!enSuelo) {
+        playerAnimState = PLAYER_JUMP;
+    } else {
+        bool moviendo = IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
+        playerAnimState = moviendo ? PLAYER_RUN : PLAYER_IDLE;
+    }
+
+    // Dirección en la que mira el mono
+    if (IsKeyDown(KEY_A)) {
+        playerFacingRight = false;
+    } else if (IsKeyDown(KEY_D)) {
+        playerFacingRight = true;
+    }
+
+    // Avance de los frames de animación
+    playerFrameTimer += dt;
+    int maxFrames = 1;
+    switch (playerAnimState) {
+        case PLAYER_IDLE: maxFrames = PLAYER_IDLE_FRAMES; break;
+        case PLAYER_RUN:  maxFrames = PLAYER_RUN_FRAMES;  break;
+        case PLAYER_JUMP: maxFrames = PLAYER_JUMP_FRAMES; break;
+    }
+    if (maxFrames <= 0) maxFrames = 1;
+
+    if (playerFrameTimer >= 1.0f / playerFrameSpeed) {
+        playerFrameTimer = 0.0f;
+        playerCurrentFrame++;
+        if (playerCurrentFrame >= maxFrames) {
+            playerCurrentFrame = 0;
+        }
+    }
+    //sprites
 }
 
 void MainGameState::render()
@@ -214,56 +326,425 @@ void MainGameState::render()
 
     BeginMode2D(camera);
 
-        DrawRectangleRec(player.boundingBox, RED);
+        // Fondo del nivel
+        {
+            ResourceManager& rm = ResourceManager::instance();
+            Texture2D bgTex = rm.getTexture("assets/img/world/background.png");
 
-        for(auto& estructura : estructuras) {
-            if(estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
-               estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200) {
-                DrawRectangleRec(estructura.rect, GRAY);
-            }
-            else if (estructura.rect.y < camera.target.y &&
-                     estructura.rect.y + estructura.rect.height > camera.target.y) {
-                DrawRectangleRec(estructura.rect, GRAY);
+            if (bgTex.id != 0) {
+                float screenW = (float)GetScreenWidth();
+                float screenH = (float)GetScreenHeight();
+
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)bgTex.width,
+                    (float)bgTex.height
+                };
+
+                Rectangle dst = {
+                    camera.target.x - camera.offset.x,
+                    camera.target.y - camera.offset.y,
+                    screenW,
+                    screenH
+                };
+
+                Vector2 origin = { 0.0f, 0.0f };
+                DrawTexturePro(bgTex, src, dst, origin, 0.0f, WHITE);
             }
         }
 
-        DrawRectangleRec(lava.rect, ORANGE);
+        //sprites
+        // Dibujar el personaje con sprites
+        {
+            Texture2D currentTexture = playerIdleTexture;
+            int maxFrames = PLAYER_IDLE_FRAMES;
 
+            switch (playerAnimState) {
+                case PLAYER_IDLE:
+                    currentTexture = playerIdleTexture;
+                    maxFrames = PLAYER_IDLE_FRAMES;
+                    break;
+                case PLAYER_RUN:
+                    currentTexture = (playerRunTexture.id != 0) ? playerRunTexture : playerIdleTexture;
+                    maxFrames = (playerRunTexture.id != 0) ? PLAYER_RUN_FRAMES : PLAYER_IDLE_FRAMES;
+                    break;
+                case PLAYER_JUMP:
+                    currentTexture = (playerJumpTexture.id != 0) ? playerJumpTexture : playerIdleTexture;
+                    maxFrames = (playerJumpTexture.id != 0) ? PLAYER_JUMP_FRAMES : PLAYER_IDLE_FRAMES;
+                    break;
+            }
+
+            if (maxFrames <= 0) maxFrames = 1;
+            int frameIndex = playerCurrentFrame % maxFrames;
+
+            Rectangle sourceRect = {
+                (float)(frameIndex * PLAYER_SPRITE_W),
+                0.0f,
+                playerFacingRight ? (float)PLAYER_SPRITE_W : -(float)PLAYER_SPRITE_W,
+                (float)PLAYER_SPRITE_H
+            };
+
+            // Escalamos el sprite para aproximarlo al tamaño de la hitbox
+            float scaleX = player.width  / (float)PLAYER_SPRITE_W;
+            float scaleY = player.height / (float)PLAYER_SPRITE_H;
+
+            Rectangle destRect = {
+                player.x,
+                player.y,
+                PLAYER_SPRITE_W * scaleX,
+                PLAYER_SPRITE_H * scaleY
+            };
+
+            Vector2 origin = { destRect.width / 2.0f, destRect.height / 2.0f };
+
+            DrawTexturePro(currentTexture, sourceRect, destRect, origin, 0.0f, WHITE);
+        }
+
+        // Dibujar estructuras
+        for (auto& estructura : estructuras) {
+            bool visible =
+                (estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
+                 estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200) ||
+                (estructura.rect.y < camera.target.y &&
+                 estructura.rect.y + estructura.rect.height > camera.target.y);
+
+            if (!visible) continue;
+
+            Rectangle r = estructura.rect;
+
+            // El suelo es la primera estructura
+            bool isFloor = (&estructura == &estructuras.front());
+
+            bool isLeftWall = !isFloor &&
+                              r.x <= 1.0f &&
+                              r.width >= 70.0f && r.width <= 90.0f &&
+                              r.height > 1000.0f;
+
+            bool isRightWall = !isFloor &&
+                               (r.x + r.width) >= (GetScreenWidth() - 1.0f) &&
+                               r.width >= 70.0f && r.width <= 90.0f &&
+                               r.height > 1000.0f;
+
+            if (isFloor) {
+                ResourceManager& rm = ResourceManager::instance();
+                Texture2D floorTexture = rm.getTexture("assets/img/world/floor.png");
+
+                if (floorTexture.id != 0) {
+                    float scale     = r.height / (float)floorTexture.height;
+                    float tileWidth = floorTexture.width * scale;
+                    float startX    = r.x;
+                    float endX      = r.x + r.width;
+
+                    Rectangle srcBase = { 0.0f, 0.0f,
+                                          (float)floorTexture.width,
+                                          (float)floorTexture.height };
+
+                    for (float x = startX; x < endX; x += tileWidth) {
+                        float remaining = endX - x;
+                        float drawWidth = tileWidth;
+                        Rectangle src   = srcBase;
+
+                        if (remaining < tileWidth) {
+                            float ratio = remaining / tileWidth;
+                            src.width  *= ratio;
+                            drawWidth   = remaining;
+                        }
+
+                        Rectangle dst = {
+                            x + drawWidth / 2.0f,
+                            r.y + r.height / 2.0f,
+                            drawWidth,
+                            r.height
+                        };
+                        Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                        DrawTexturePro(floorTexture, src, dst, origin, 0.0f, WHITE);
+                    }
+                } else {
+                    DrawRectangleRec(r, GRAY);
+                }
+            }
+            else if (isLeftWall) {
+                ResourceManager& rm = ResourceManager::instance();
+                Texture2D leftWallTex = rm.getTexture("assets/img/world/wallizq.png");
+
+                if (leftWallTex.id != 0) {
+                    float scale      = r.width / (float)leftWallTex.width;
+                    float tileHeight = leftWallTex.height * scale;
+                    float startY     = r.y;
+                    float endY       = r.y + r.height;
+
+                    Rectangle srcBase = { 0.0f, 0.0f,
+                                          (float)leftWallTex.width,
+                                          (float)leftWallTex.height };
+
+                    for (float y = startY; y < endY; y += tileHeight) {
+                        float remaining  = endY - y;
+                        float drawHeight = tileHeight;
+                        Rectangle src    = srcBase;
+
+                        if (remaining < tileHeight) {
+                            float ratio = remaining / tileHeight;
+                            src.height *= ratio;
+                            drawHeight  = remaining;
+                        }
+
+                        Rectangle dst = {
+                            r.x + r.width / 2.0f,
+                            y + drawHeight / 2.0f,
+                            r.width,
+                            drawHeight
+                        };
+                        Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                        DrawTexturePro(leftWallTex, src, dst, origin, 0.0f, WHITE);
+                    }
+                } else {
+                    DrawRectangleRec(r, GRAY);
+                }
+            }
+            else if (isRightWall) {
+                ResourceManager& rm = ResourceManager::instance();
+                Texture2D rightWallTex = rm.getTexture("assets/img/world/wallder.png");
+
+                if (rightWallTex.id != 0) {
+                    float scale      = r.width / (float)rightWallTex.width;
+                    float tileHeight = rightWallTex.height * scale;
+                    float startY     = r.y;
+                    float endY       = r.y + r.height;
+
+                    Rectangle srcBase = { 0.0f, 0.0f,
+                                          (float)rightWallTex.width,
+                                          (float)rightWallTex.height };
+
+                    for (float y = startY; y < endY; y += tileHeight) {
+                        float remaining  = endY - y;
+                        float drawHeight = tileHeight;
+                        Rectangle src    = srcBase;
+
+                        if (remaining < tileHeight) {
+                            float ratio = remaining / tileHeight;
+                            src.height *= ratio;
+                            drawHeight  = remaining;
+                        }
+
+                        Rectangle dst = {
+                            r.x + r.width / 2.0f,
+                            y + drawHeight / 2.0f,
+                            r.width,
+                            drawHeight
+                        };
+                        Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                        DrawTexturePro(rightWallTex, src, dst, origin, 0.0f, WHITE);
+                    }
+                } else {
+                    DrawRectangleRec(r, GRAY);
+                }
+            }
+            else if (platformTexture.id != 0 && r.height <= 60.0f) {
+                // Plataformas (rectángulos bajos) -> sprite de plataforma
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)platformTexture.width,
+                    (float)platformTexture.height
+                };
+
+                Rectangle dst = {
+                    r.x,
+                    r.y,
+                    r.width,
+                    r.height
+                };
+
+                Vector2 origin = { 0.0f, 0.0f };
+                DrawTexturePro(platformTexture, src, dst, origin, 0.0f, WHITE);
+            } else {
+                // Cualquier otra estructura rara
+                DrawRectangleRec(r, GRAY);
+            }
+        }
+        //sprites
+
+        if (lavaTexture.id != 0) {
+            Rectangle src = {
+                0.0f,
+                0.0f,
+                (float)lavaTexture.width,
+                (float)lavaTexture.height
+            };
+
+            Rectangle dst = {
+                lava.rect.x + lava.rect.width / 2.0f,
+                lava.rect.y + lava.rect.height / 2.0f,
+                lava.rect.width,
+                lava.rect.height
+            };
+
+            Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+            DrawTexturePro(lavaTexture, src, dst, origin, 0.0f, WHITE);
+        } else {
+            DrawRectangleRec(lava.rect, ORANGE);
+        }
+
+
+         //sprites PU
+
+        // salto
         if (powerUp.active) {
-            DrawCircle(powerUp.x, powerUp.y, powerUp.radius, GREEN);
-            DrawCircle(powerUp.x, powerUp.y, powerUp.radius + 5, Fade(GREEN, 0.3f));
+            float size = powerUp.radius * 2.0f;
+
+            if (jumpPUTexture.id != 0) {
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)jumpPUTexture.width,
+                    (float)jumpPUTexture.height
+                };
+                Rectangle dst = {
+                    powerUp.x,
+                    powerUp.y,
+                    size,
+                    size
+                };
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                DrawTexturePro(jumpPUTexture, src, dst, origin, 0.0f, WHITE);
+            }
+
+            DrawCircleLines(powerUp.x, powerUp.y, powerUp.radius, GREEN);
         }
 
+        // escudo
         if (shieldPU.active) {
-            DrawCircle(shieldPU.x, shieldPU.y, shieldPU.radius, BLUE);
-            DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius + 6, DARKBLUE);
+            float size = shieldPU.radius * 2.0f;
+
+            if (shieldPUWorldTexture.id != 0) {
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)shieldPUWorldTexture.width,
+                    (float)shieldPUWorldTexture.height
+                };
+                Rectangle dst = {
+                    shieldPU.x,
+                    shieldPU.y,
+                    size,
+                    size
+                };
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                DrawTexturePro(shieldPUWorldTexture, src, dst, origin, 0.0f, WHITE);
+            }
+
+            DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius, BLUE);
         }
 
+        // slow
         if (slowPU.active) {
-            DrawCircle(slowPU.x, slowPU.y, slowPU.radius, PURPLE);
-            DrawCircle(slowPU.x, slowPU.y, slowPU.radius + 5, Fade(PURPLE, 0.3f));
+            float size = slowPU.radius * 2.0f;
+
+            if (slowPUTexture.id != 0) {
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)slowPUTexture.width,
+                    (float)slowPUTexture.height
+                };
+                Rectangle dst = {
+                    slowPU.x,
+                    slowPU.y,
+                    size,
+                    size
+                };
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                DrawTexturePro(slowPUTexture, src, dst, origin, 0.0f, WHITE);
+            }
+
+            DrawCircleLines(slowPU.x, slowPU.y, slowPU.radius, PURPLE);
         }
 
+        // doble puntuación
         if (doublePU.active) {
-            DrawCircle(doublePU.x, doublePU.y, doublePU.radius, GOLD);
-            DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
+            float size = doublePU.radius * 2.0f;
+
+            if (doublePUTexture.id != 0) {
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)doublePUTexture.width,
+                    (float)doublePUTexture.height
+                };
+                Rectangle dst = {
+                    doublePU.x,
+                    doublePU.y,
+                    size,
+                    size
+                };
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                DrawTexturePro(doublePUTexture, src, dst, origin, 0.0f, WHITE);
+            }
+
+            DrawCircleLines(doublePU.x, doublePU.y, doublePU.radius, GOLD);
+        }
+        //sprites PU
+
+
+        // Puntuación usando la fuente gestionada por el ResourceManager
+        {
+            const char* scoreText = TextFormat("Puntuacion: %d", (int)puntuacion);
+            Vector2 scorePos = {
+                camera.target.x - camera.offset.x + 10.0f,
+                camera.target.y - camera.offset.y + 10.0f
+            };
+            DrawTextEx(uiFont, scoreText, scorePos, 24.0f, 1.0f, BLACK);
         }
 
-        DrawText(TextFormat("Puntuacion: %d", (int)puntuacion),
-                 (int)(camera.target.x - camera.offset.x + 10),
-                 (int)(camera.target.y - camera.offset.y + 10),
-                 24, BLACK);
+        // OVNI con sprite a tamaño pequeño
+        if (ufo.active && ufoTexture.id != 0) {
+            float spriteW = (float)ufoTexture.width;
+            float spriteH = (float)ufoTexture.height;
 
-        if (ufo.active) {
-            DrawEllipse(ufo.x, ufo.y, 40, 14, GRAY);
-            DrawEllipseLines(ufo.x, ufo.y, 40, 14, DARKGRAY);
-            DrawCircle(ufo.x, ufo.y - 6, 8, LIGHTGRAY);
-            Vector2 a = { ufo.x - 20, ufo.y + 8 };
-            Vector2 b = { ufo.x + 20, ufo.y + 8 };
-            Vector2 c = { player.x,   player.y + player.height/2 + 10 };
+            // Queremos algo parecido al UFO antiguo (≈80 px de ancho)
+            float targetWidth  = 80.0f;
+            float scale        = targetWidth / spriteW;
+            float targetHeight = spriteH * scale;
+
+            Rectangle src = {
+                0.0f,
+                0.0f,
+                spriteW,
+                spriteH
+            };
+
+            Rectangle dst = {
+                ufo.x,            // centro X
+                ufo.y,            // centro Y
+                targetWidth,
+                targetHeight
+            };
+
+            Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+            DrawTexturePro(ufoTexture, src, dst, origin, 0.0f, WHITE);
+
+            // Rayo tractor debajo del ovni
+            float beamBaseY      = ufo.y + targetHeight * 0.25f;
+            float beamHalfWidth  = 20.0f;
+
+            Vector2 a = { ufo.x - beamHalfWidth, beamBaseY };
+            Vector2 b = { ufo.x + beamHalfWidth, beamBaseY };
+            Vector2 c = { player.x, player.y + player.height/2 + 10 };
+
             DrawTriangle(a, b, c, Fade(SKYBLUE, 0.35f));
             DrawTriangleLines(a, b, c, Fade(DARKBLUE, 0.5f));
         }
+
 
         if (shieldActive) {
             Vector2 cc = { player.x, player.y };
@@ -274,12 +755,7 @@ void MainGameState::render()
             DrawCircleLines((int)cc.x, (int)cc.y, r, BLUE);
             DrawCircle((int)cc.x, (int)cc.y, r + 4.0f, Fade(BLUE, 0.18f));
         }
-
-        if (doublePU.active) {
-            DrawCircle(doublePU.x, doublePU.y, doublePU.radius, GOLD);
-            DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
-        }
-
+        
     EndMode2D();
 
     {
@@ -380,7 +856,7 @@ bool gestionarColisiones(std::deque<Estructura>& estructuras, Player& player) {
 }
 
 void gestionarSalto(Player& player, float deltaTime, bool& enSuelo) {
-    const int gravedad = 2000;
+    const int gravedad = 1500;
 
     player.jumpBufferTime -= deltaTime;
     player.coyoteTime -= deltaTime;
@@ -406,23 +882,24 @@ void gestionarSalto(Player& player, float deltaTime, bool& enSuelo) {
     }
 }
 
-void gestionarLava(float deltaTime, Lava& lava, Player& player, StateMachine* state_machine, float& puntuacion, std::deque<Estructura>& estructuras) {
-    for (auto it = estructuras.begin(); it != estructuras.end(); ) {
-        if (it->rect.y > lava.rect.y) {
-            it = estructuras.erase(it);
-        } else {
-            ++it;
-        }
-    }
+void gestionarLava(float deltaTime, Lava& lava, Player& player,
+                   StateMachine* state_machine, float& puntuacion,
+                   std::deque<Estructura>& estructuras) {
+    // De momento NO tocamos las estructuras (suelo, paredes, plataformas)
+    (void)estructuras; // para evitar warning de parámetro sin usar
 
+    // La lava sube (y disminuye)
     lava.rect.y -= lava.vy * deltaTime;
-    if(CheckCollisionRecs(player.boundingBox, lava.rect)){
+
+    // Si toca al jugador -> Game Over
+    if (CheckCollisionRecs(player.boundingBox, lava.rect)) {
         auto gameOver = std::make_unique<GameOverState>();
         gameOver->setStateMachine(state_machine);
         gameOver->setPuntuacion(puntuacion);
         state_machine->add_state(std::move(gameOver), true);
     }
 }
+
 
 void generarPowerUp(PowerUp& powerUp, float playerY) {
     powerUp.active = true;

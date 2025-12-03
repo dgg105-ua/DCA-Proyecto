@@ -19,7 +19,7 @@ struct Player{
 
     // Mecanicas de salto
     float jumpBufferTime = 0.0f;    // Buffer de salto: Permite saltar un poco antes de tocar el suelo
-    float coyoteTime = 0.0f;    // Tiempo de coyote: Permite saltar un poco después de haber salido del suelo
+    float coyoteTime = 0.0f;        // Tiempo de coyote: Permite saltar un poco después de haber salido del suelo
 };
 
 struct Estructura{
@@ -53,7 +53,6 @@ class MainGameState : public GameState
 
         friend void iniciarRescateOVNI(Player& player, const Rectangle& lavaRect, MainGameState* self);
         friend void actualizarRescateOVNI(Player& player, float deltaTime, MainGameState* self);
-
 
         void pause(){};
         void resume(){};
@@ -106,7 +105,7 @@ class MainGameState : public GameState
         const float doubleDuration = 10.0f;
         float puntuacionX = 1.0f;
 
-        // ICONOS ARRIBA DERECHA DE LOS POWERUPS
+        // Iconos PU
         Texture2D hudShieldTex = {0}; bool hudShieldLoaded = false;
         Rectangle hudShieldRect = {0};
         Texture2D hudSlowTex   = {0}; bool hudSlowLoaded   = false;
@@ -115,9 +114,50 @@ class MainGameState : public GameState
         Rectangle hudDoubleRect = {0};
 
         float plataformasGapX = 400.0f;   // Distancia horizontal entre plataformas
-        float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
+        float plataformasGapY = 200.0f;   // Distancia vertical entre plataformas
         float ultimoX = GetScreenWidth()/2; // Posición X de primera plataforma generada
         float ultimoY = -200; // Posición Y de primera plataforma generada
 
         bool primerFrame = true;
+
+        //sprites
+        // Texturas del personaje a través del ResourceManager
+        Texture2D playerIdleTexture{};
+        Texture2D playerRunTexture{};
+        Texture2D playerJumpTexture{};
+
+        // Textura de las plataformas
+        Texture2D platformTexture{};
+
+        // Texturas PU
+        Texture2D jumpPUTexture{};
+        Texture2D shieldPUWorldTexture{};
+        Texture2D slowPUTexture{};
+        Texture2D doublePUTexture{};
+
+        // Fuente para el HUD gestionada por el ResourceManager
+        Font uiFont{};
+
+        // Textura OVNI
+        Texture2D ufoTexture{};
+
+        // Textura de la lava
+        Texture2D lavaTexture{};
+
+        // Estado de animación del jugador
+        enum PlayerAnimState { PLAYER_IDLE, PLAYER_RUN, PLAYER_JUMP };
+        PlayerAnimState playerAnimState = PLAYER_IDLE;
+
+        int   playerCurrentFrame = 0;
+        float playerFrameTimer   = 0.0f;
+        float playerFrameSpeed   = 12.0f;
+        bool  playerFacingRight  = true;
+
+        // Tamaño de cada frame en el spritesheet y número de frames
+        static constexpr int PLAYER_SPRITE_W     = 32;
+        static constexpr int PLAYER_SPRITE_H     = 32;
+        static constexpr int PLAYER_IDLE_FRAMES  = 18;
+        static constexpr int PLAYER_RUN_FRAMES   = 8;
+        static constexpr int PLAYER_JUMP_FRAMES  = 4;
+        //sprites
 };

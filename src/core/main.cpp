@@ -3,6 +3,7 @@
 #include <MainGameState.hpp>
 #include <memory>
 #include <chrono>
+#include <ResourceManager.hpp>
 
 extern "C" {
     #include <raylib.h>
@@ -35,6 +36,8 @@ int main()
         state_machine.getCurrentState()->update(delta_time);
         state_machine.getCurrentState()->render();       
     }
+
+    ResourceManager::instance().unloadAll();
 
     CloseWindow();
 

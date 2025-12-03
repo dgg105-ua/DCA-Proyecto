@@ -2,11 +2,13 @@
 #include <iostream>
 #include <StateMachine.hpp>
 #include <MainGameState.hpp>
+#include <ResourceManager.hpp>
 using namespace std;
 
 extern "C" {
     #include <raylib.h>
 }
+
 
 MainMenuState::MainMenuState() : selectedOption(0)
 {
@@ -14,23 +16,48 @@ MainMenuState::MainMenuState() : selectedOption(0)
 
 void MainMenuState::init()
 {
-    float buttonWidth = 200;
-    float buttonHeight = 50;
-    float spacing = 20;
+    //sprites
+    // Cargar recursos gráficos del menú con el gestor de recursos
+    ResourceManager& rm = ResourceManager::instance();
 
+    // Fondo del menú
+    menuBackgroundTex = rm.getTexture("assets/img/menu/menu_background.png");
+
+    // Botones exit y play (imagenes)
+    playButtonTex = rm.getTexture("assets/img/menu/Play Button.png");
+    exitButtonTex = rm.getTexture("assets/img/menu/Exit Button.png");
+
+    // Fuente para el título del juego
+    uiFont = rm.getFont("assets/fonts/ui.ttf");
+
+
+    // Tamaños botones
+    float playW  = (playButtonTex.id != 0) ? (float)playButtonTex.width  : 400.0f;
+    float playH  = (playButtonTex.id != 0) ? (float)playButtonTex.height : 100.0f;
+    float exitW  = (exitButtonTex.id != 0) ? (float)exitButtonTex.width  : playW;
+    float exitH  = (exitButtonTex.id != 0) ? (float)exitButtonTex.height : playH;
+
+    float screenW = (float)GetScreenWidth();
+    float screenH = (float)GetScreenHeight();
+
+    float spacing = 20.0f;
+
+    // sprite play tamaño boton
     playButton = {
-        (GetScreenWidth() - buttonWidth) / 2,
-        (GetScreenHeight() - (buttonHeight * 2 + spacing)) / 2,
-        buttonWidth,
-        buttonHeight
+        (screenW - playW) / 2.0f,
+        (screenH - (playH + spacing + exitH)) / 2.0f,
+        playW,
+        playH
     };
 
+    // sprite exit tamaño boton
     exitButton = {
-        (GetScreenWidth() - buttonWidth) / 2,
-        playButton.y + buttonHeight + spacing,
-        buttonWidth,
-        buttonHeight
+        (screenW - exitW) / 2.0f,
+        playButton.y + playButton.height + spacing,
+        exitW,
+        exitH
     };
+    //sprites
 }
 
 void MainMenuState::loadBackground()
@@ -98,20 +125,66 @@ void MainMenuState::update(float deltaTime)
 void MainMenuState::render()
 {
     BeginDrawing();
-        ClearBackground(SKYBLUE);
 
-        // Title
-        const char* title = "SALTA BINNY";
-        int titleFontSize = 80;
-        int titleWidth = MeasureText(title, titleFontSize);
-        DrawText(title, (GetScreenWidth() - titleWidth) / 2, GetScreenHeight() / 4, titleFontSize, DARKBLUE);
+        //sprites
+        // fondo del menu
+        ClearBackground(BLACK);
+        if (menuBackgroundTex.id != 0) {
+            float texW    = (float)menuBackgroundTex.width;
+            float texH    = (float)menuBackgroundTex.height;
+            float screenW = (float)GetScreenWidth();
+            float screenH = (float)GetScreenHeight();
 
-        // Draw buttons
-        DrawRectangleRec(playButton, (selectedOption == 0) ? GREEN : DARKGREEN);
-        DrawText("Play", playButton.x + (playButton.width - MeasureText("Play", 20)) / 2, playButton.y + (playButton.height - 20) / 2, 20, WHITE);
+            Rectangle src = { 0.0f, 0.0f, texW, texH };
+            Rectangle dst = { 0.0f, 0.0f, screenW, screenH };
+            Vector2 origin = { 0.0f, 0.0f };
 
-        DrawRectangleRec(exitButton, (selectedOption == 1) ? RED : MAROON);
-        DrawText("Exit", exitButton.x + (exitButton.width - MeasureText("Exit", 20)) / 2, exitButton.y + (exitButton.height - 20) / 2, 20, WHITE);
+            DrawTexturePro(menuBackgroundTex, src, dst, origin, 0.0f, WHITE);
+        }
+        const char* title = "Project Prime-8";
+        float titleFontSize = 84.0f;
+        float titleSpacing  = 2.0f;
+
+        Vector2 titleSize = MeasureTextEx(uiFont, title, titleFontSize, titleSpacing);
+        Vector2 titlePos = {
+            (GetScreenWidth()  - titleSize.x) / 2.0f,
+            GetScreenHeight() * 0.18f
+        };
+        DrawTextEx(uiFont, title, titlePos, titleFontSize, titleSpacing, RAYWHITE);
+
+
+        // botones dibujados
+        Vector2 mousePos = GetMousePosition();
+        bool playHover = CheckCollisionPointRec(mousePos, playButton);
+        bool exitHover = CheckCollisionPointRec(mousePos, exitButton);
+
+        Color playTint = (selectedOption == 0 || playHover) ? WHITE : Fade(WHITE, 0.6f);
+        Color exitTint = (selectedOption == 1 || exitHover) ? WHITE : Fade(WHITE, 0.6f);
+
+        if (playButtonTex.id != 0) {
+            Rectangle srcPlay = { 0.0f, 0.0f, (float)playButtonTex.width, (float)playButtonTex.height };
+            Rectangle dstPlay = { playButton.x, playButton.y, playButton.width, playButton.height };
+            DrawTexturePro(playButtonTex, srcPlay, dstPlay, Vector2{0.0f, 0.0f}, 0.0f, playTint);
+        } else {
+            DrawRectangleRec(playButton, (selectedOption == 0) ? GREEN : DARKGREEN);
+            DrawText("Play",
+                     playButton.x + (playButton.width - MeasureText("Play", 20)) / 2,
+                     playButton.y + (playButton.height - 20) / 2,
+                     20, WHITE);
+        }
+
+        if (exitButtonTex.id != 0) {
+            Rectangle srcExit = { 0.0f, 0.0f, (float)exitButtonTex.width, (float)exitButtonTex.height };
+            Rectangle dstExit = { exitButton.x, exitButton.y, exitButton.width, exitButton.height };
+            DrawTexturePro(exitButtonTex, srcExit, dstExit, Vector2{0.0f, 0.0f}, 0.0f, exitTint);
+        } else {
+            DrawRectangleRec(exitButton, (selectedOption == 1) ? RED : MAROON);
+            DrawText("Exit",
+                     exitButton.x + (exitButton.width - MeasureText("Exit", 20)) / 2,
+                     exitButton.y + (exitButton.height - 20) / 2,
+                     20, WHITE);
+        }
+        //sprites
 
     EndDrawing();
 }
