@@ -29,8 +29,8 @@ void MainGameState::init()
     player.y = -100;
     player.vx = 350.0f;
     player.vy = 0;
-    player.height = 60;
-    player.width = 40;
+    player.height = 80;
+    player.width = 70;
 
     Rectangle boundingBox = {player.x - player.width/2, player.y - player.height/2, player.width, player.height};
     player.boundingBox = boundingBox;
@@ -41,7 +41,7 @@ void MainGameState::init()
     camera.zoom = 1.0f;
 
     lava.vy = 150.0f;
-    Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 1000};
+    Rectangle lavaRect = {0, 300, (float)GetScreenWidth(), 500};
     lava.rect = lavaRect;
 
     puntuacion = 0.0f;
@@ -150,7 +150,7 @@ void MainGameState::init()
     playerAnimState    = PLAYER_IDLE;
     playerCurrentFrame = 0;
     playerFrameTimer   = 0.0f;
-    playerFrameSpeed   = 12.0f;
+    playerFrameSpeed   = 8.0f;
     playerFacingRight  = true;
     //sprites
 }
@@ -856,7 +856,7 @@ bool gestionarColisiones(std::deque<Estructura>& estructuras, Player& player) {
 }
 
 void gestionarSalto(Player& player, float deltaTime, bool& enSuelo) {
-    const int gravedad = 2000;
+    const int gravedad = 1500;
 
     player.jumpBufferTime -= deltaTime;
     player.coyoteTime -= deltaTime;

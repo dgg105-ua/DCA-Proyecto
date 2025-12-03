@@ -114,7 +114,7 @@ class MainGameState : public GameState
         Rectangle hudDoubleRect = {0};
 
         float plataformasGapX = 400.0f;   // Distancia horizontal entre plataformas
-        float plataformasGapY = 150.0f;   // Distancia vertical entre plataformas
+        float plataformasGapY = 200.0f;   // Distancia vertical entre plataformas
         float ultimoX = GetScreenWidth()/2; // Posición X de primera plataforma generada
         float ultimoY = -200; // Posición Y de primera plataforma generada
 
