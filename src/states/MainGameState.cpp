@@ -804,35 +804,13 @@ void gestionarSalto(Player& player, float deltaTime, bool& enSuelo) {
 void gestionarLava(float deltaTime, Lava& lava, Player& player,
                    StateMachine* state_machine, float& puntuacion,
                    std::deque<Estructura>& estructuras) {
+    // De momento NO tocamos las estructuras (suelo, paredes, plataformas)
+    (void)estructuras; // para evitar warning de parámetro sin usar
 
-    for (auto it = estructuras.begin(); it != estructuras.end(); ) {
-        const Rectangle& r = it->rect;
-
-        bool isFloor = (it == estructuras.begin());
-
-        bool isLeftWall =
-            !isFloor &&
-            r.x <= 1.0f &&
-            r.width >= 70.0f && r.width <= 90.0f &&
-            r.height > 1000.0f;
-
-        bool isRightWall =
-            !isFloor &&
-            (r.x + r.width) >= (GetScreenWidth() - 1.0f) &&
-            r.width >= 70.0f && r.width <= 90.0f &&
-            r.height > 1000.0f;
-
-        bool isSideWall = isLeftWall || isRightWall;
-
-        if (!isSideWall && r.y > lava.rect.y) {
-            it = estructuras.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
+    // La lava sube (y disminuye)
     lava.rect.y -= lava.vy * deltaTime;
 
+    // Si toca al jugador -> Game Over
     if (CheckCollisionRecs(player.boundingBox, lava.rect)) {
         auto gameOver = std::make_unique<GameOverState>();
         gameOver->setStateMachine(state_machine);
