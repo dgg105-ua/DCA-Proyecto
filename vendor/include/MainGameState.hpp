@@ -54,7 +54,6 @@ class MainGameState : public GameState
         friend void iniciarRescateOVNI(Player& player, const Rectangle& lavaRect, MainGameState* self);
         friend void actualizarRescateOVNI(Player& player, float deltaTime, MainGameState* self);
 
-
         void pause(){};
         void resume(){};
     
@@ -106,7 +105,7 @@ class MainGameState : public GameState
         const float doubleDuration = 10.0f;
         float puntuacionX = 1.0f;
 
-        // ICONOS ARRIBA DERECHA DE LOS POWERUPS
+        // Iconos PU
         Texture2D hudShieldTex = {0}; bool hudShieldLoaded = false;
         Rectangle hudShieldRect = {0};
         Texture2D hudSlowTex   = {0}; bool hudSlowLoaded   = false;
@@ -129,6 +128,12 @@ class MainGameState : public GameState
 
         // Textura de las plataformas
         Texture2D platformTexture{};
+
+        // Texturas PU
+        Texture2D jumpPUTexture{};
+        Texture2D shieldPUWorldTexture{};
+        Texture2D slowPUTexture{};
+        Texture2D doublePUTexture{};
 
         // Fuente para el HUD gestionada por el ResourceManager
         Font uiFont{};

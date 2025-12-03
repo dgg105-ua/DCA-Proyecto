@@ -2,9 +2,7 @@
 #include <iostream>
 #include <GameOverState.hpp>
 #include <cmath>
-//SPRITE
 #include <ResourceManager.hpp>
-//SPRITE
 
 MainGameState::MainGameState()
 {
@@ -80,17 +78,15 @@ void MainGameState::init()
     powerUpSpawnTimer = 0.0f;
     powerUpSpawnInterval = GetRandomValue(5, 8);
 
-    //SPRITE_MAP  <-- (variables antiguas, sin uso ahora mismo)
     float worldWidth  = GetScreenWidth() * 0.80f;
     float marginX     = (GetScreenWidth() - worldWidth) / 2.0f;
     float wallWidth   = 80.0f;
     float floorHeight = 50.0f;
 
     // Mapa original, ancho completo
-    generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);              // suelo
-    generarEstructura(estructuras, 0, -10000, 80, 10000);                      // pared izquierda
-    generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000);    // pared derecha
-    //SPRITE_MAP
+    generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);
+    generarEstructura(estructuras, 0, -10000, 80, 10000);
+    generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000);
 
     float hudSize = 48.0f;
     float margin = 10.0f;
@@ -99,23 +95,32 @@ void MainGameState::init()
     hudSlowRect   = { screenW - (hudSize*2.0f) - (margin*2.0f), margin, hudSize, hudSize };
     hudDoubleRect = { screenW - (hudSize*3.0f) - (margin*3.0f), margin, hudSize, hudSize };
 
-    const char* SHIELD_CANDIDATES[] = { "assets/shield.png", "src/assets/shield.png" };
+    const char* SHIELD_CANDIDATES[] = {
+        "assets/img/powerupsc/shield.png",
+        "src/assets/img/powerupsc/shield.png"
+    };
     for (const char* p : SHIELD_CANDIDATES) {
         if (FileExists(p)) { hudShieldTex = LoadTexture(p); hudShieldLoaded = (hudShieldTex.id != 0); break; }
     }
 
-    const char* SLOW_CANDIDATES[] = { "assets/slow.png", "src/assets/slow.png" };
+    const char* SLOW_CANDIDATES[] = {
+        "assets/img/powerupsc/slow.png",
+        "src/assets/img/powerupsc/slow.png"
+    };
     for (const char* p : SLOW_CANDIDATES) {
         if (FileExists(p)) { hudSlowTex = LoadTexture(p); hudSlowLoaded = (hudSlowTex.id != 0); break; }
     }
 
-    const char* DOUBLE_CANDIDATES[] = { "assets/double.png", "src/assets/double.png" };
+    const char* DOUBLE_CANDIDATES[] = {
+        "assets/img/powerupsc/double.png",
+        "src/assets/img/powerupsc/double.png"
+    };
     for (const char* p : DOUBLE_CANDIDATES) {
         if (FileExists(p)) { hudDoubleTex = LoadTexture(p); hudDoubleLoaded = (hudDoubleTex.id != 0); break; }
     }
 
-    //SPRITE
-    // Cargar sprites del personaje (Idle, Run, Jump) y de plataformas a través del gestor de recursos (singleton)
+    //sprites
+    // Cargar sprites a través del gestor de recursos 
     ResourceManager& rm = ResourceManager::instance();
 
     // Personaje
@@ -123,9 +128,17 @@ void MainGameState::init()
     playerRunTexture  = rm.getTexture("assets/img/player/Run.png");
     playerJumpTexture = rm.getTexture("assets/img/player/Jump.png");
 
-    // Plataforma: imagen recortada de la losa de suelo/plataforma
-    // (ajusta la ruta si la has guardado en otra carpeta)
+    // Plataforma
     platformTexture   = rm.getTexture("assets/img/world/platform.png");
+
+    // Fuente para HUD
+    uiFont = rm.getFont("assets/fonts/ui.ttf");
+
+    // PU
+    jumpPUTexture        = rm.getTexture("assets/img/powerups/jump.png");
+    shieldPUWorldTexture = rm.getTexture("assets/img/powerups/shield.png");
+    slowPUTexture        = rm.getTexture("assets/img/powerups/slow.png");
+    doublePUTexture      = rm.getTexture("assets/img/powerups/double.png");
 
     // Inicializar estado de animación del jugador
     playerAnimState    = PLAYER_IDLE;
@@ -133,10 +146,7 @@ void MainGameState::init()
     playerFrameTimer   = 0.0f;
     playerFrameSpeed   = 12.0f;
     playerFacingRight  = true;
-
-    // Fuente para HUD (puntuación, etc.), también gestionada por ResourceManager
-    uiFont = rm.getFont("assets/fonts/ui.ttf");
-    //SPRITE
+    //sprites
 }
 
 void MainGameState::handleInput(){
@@ -240,15 +250,13 @@ void MainGameState::update(float deltaTime)
         }
     }
 
-    //SPRITE
-    // --- Lógica de animación del jugador en función de su estado físico ---
+    //sprites
+    // animación del jugador
 
     // Estado: suelo / aire
     if (!enSuelo) {
-        // Jugador en el aire -> animación de salto
         playerAnimState = PLAYER_JUMP;
     } else {
-        // Jugador en el suelo -> idle o correr
         bool moviendo = IsKeyDown(KEY_A) || IsKeyDown(KEY_D);
         playerAnimState = moviendo ? PLAYER_RUN : PLAYER_IDLE;
     }
@@ -277,7 +285,7 @@ void MainGameState::update(float deltaTime)
             playerCurrentFrame = 0;
         }
     }
-    //SPRITE
+    //sprites
 }
 
 void MainGameState::render()
@@ -287,8 +295,36 @@ void MainGameState::render()
 
     BeginMode2D(camera);
 
-        //SPRITE
-        // Dibujar el personaje con sprites (Idle / Run / Jump)
+        // Fondo del nivel
+        {
+            ResourceManager& rm = ResourceManager::instance();
+            Texture2D bgTex = rm.getTexture("assets/img/world/background.png");
+
+            if (bgTex.id != 0) {
+                float screenW = (float)GetScreenWidth();
+                float screenH = (float)GetScreenHeight();
+
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)bgTex.width,
+                    (float)bgTex.height
+                };
+
+                Rectangle dst = {
+                    camera.target.x - camera.offset.x,
+                    camera.target.y - camera.offset.y,
+                    screenW,
+                    screenH
+                };
+
+                Vector2 origin = { 0.0f, 0.0f };
+                DrawTexturePro(bgTex, src, dst, origin, 0.0f, WHITE);
+            }
+        }
+
+        //sprites
+        // Dibujar el personaje con sprites
         {
             Texture2D currentTexture = playerIdleTexture;
             int maxFrames = PLAYER_IDLE_FRAMES;
@@ -333,10 +369,8 @@ void MainGameState::render()
 
             DrawTexturePro(currentTexture, sourceRect, destRect, origin, 0.0f, WHITE);
         }
-        //SPRITE
 
-        //SPRITE
-        // Dibujar estructuras (plataformas, suelo y paredes).
+        // Dibujar estructuras
         for (auto& estructura : estructuras) {
             bool visible =
                 (estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
@@ -348,35 +382,38 @@ void MainGameState::render()
 
             Rectangle r = estructura.rect;
 
-            // El suelo es la primera estructura que se genera:
-            // generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);
+            // El suelo es la primera estructura
             bool isFloor = (&estructura == &estructuras.front());
 
+            bool isLeftWall = !isFloor &&
+                              r.x <= 1.0f &&
+                              r.width >= 70.0f && r.width <= 90.0f &&
+                              r.height > 1000.0f;
+
+            bool isRightWall = !isFloor &&
+                               (r.x + r.width) >= (GetScreenWidth() - 1.0f) &&
+                               r.width >= 70.0f && r.width <= 90.0f &&
+                               r.height > 1000.0f;
+
             if (isFloor) {
-                // --- Sprite del suelo, obtenido desde el ResourceManager (singleton) ---
                 ResourceManager& rm = ResourceManager::instance();
                 Texture2D floorTexture = rm.getTexture("assets/img/world/floor.png");
 
                 if (floorTexture.id != 0) {
-                    // Tilear la textura a lo ancho del suelo
                     float scale     = r.height / (float)floorTexture.height;
                     float tileWidth = floorTexture.width * scale;
                     float startX    = r.x;
                     float endX      = r.x + r.width;
 
-                    Rectangle srcBase = {
-                        0.0f,
-                        0.0f,
-                        (float)floorTexture.width,
-                        (float)floorTexture.height
-                    };
+                    Rectangle srcBase = { 0.0f, 0.0f,
+                                          (float)floorTexture.width,
+                                          (float)floorTexture.height };
 
                     for (float x = startX; x < endX; x += tileWidth) {
                         float remaining = endX - x;
                         float drawWidth = tileWidth;
                         Rectangle src   = srcBase;
 
-                        // Si el último trozo no cabe entero, recortamos la textura
                         if (remaining < tileWidth) {
                             float ratio = remaining / tileWidth;
                             src.width  *= ratio;
@@ -394,7 +431,84 @@ void MainGameState::render()
                         DrawTexturePro(floorTexture, src, dst, origin, 0.0f, WHITE);
                     }
                 } else {
-                    // Si no se pudo cargar la textura, dibujamos un rectángulo gris como fallback
+                    DrawRectangleRec(r, GRAY);
+                }
+            }
+            else if (isLeftWall) {
+                ResourceManager& rm = ResourceManager::instance();
+                Texture2D leftWallTex = rm.getTexture("assets/img/world/wallizq.png");
+
+                if (leftWallTex.id != 0) {
+                    float scale      = r.width / (float)leftWallTex.width;
+                    float tileHeight = leftWallTex.height * scale;
+                    float startY     = r.y;
+                    float endY       = r.y + r.height;
+
+                    Rectangle srcBase = { 0.0f, 0.0f,
+                                          (float)leftWallTex.width,
+                                          (float)leftWallTex.height };
+
+                    for (float y = startY; y < endY; y += tileHeight) {
+                        float remaining  = endY - y;
+                        float drawHeight = tileHeight;
+                        Rectangle src    = srcBase;
+
+                        if (remaining < tileHeight) {
+                            float ratio = remaining / tileHeight;
+                            src.height *= ratio;
+                            drawHeight  = remaining;
+                        }
+
+                        Rectangle dst = {
+                            r.x + r.width / 2.0f,
+                            y + drawHeight / 2.0f,
+                            r.width,
+                            drawHeight
+                        };
+                        Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                        DrawTexturePro(leftWallTex, src, dst, origin, 0.0f, WHITE);
+                    }
+                } else {
+                    DrawRectangleRec(r, GRAY);
+                }
+            }
+            else if (isRightWall) {
+                ResourceManager& rm = ResourceManager::instance();
+                Texture2D rightWallTex = rm.getTexture("assets/img/world/wallder.png");
+
+                if (rightWallTex.id != 0) {
+                    float scale      = r.width / (float)rightWallTex.width;
+                    float tileHeight = rightWallTex.height * scale;
+                    float startY     = r.y;
+                    float endY       = r.y + r.height;
+
+                    Rectangle srcBase = { 0.0f, 0.0f,
+                                          (float)rightWallTex.width,
+                                          (float)rightWallTex.height };
+
+                    for (float y = startY; y < endY; y += tileHeight) {
+                        float remaining  = endY - y;
+                        float drawHeight = tileHeight;
+                        Rectangle src    = srcBase;
+
+                        if (remaining < tileHeight) {
+                            float ratio = remaining / tileHeight;
+                            src.height *= ratio;
+                            drawHeight  = remaining;
+                        }
+
+                        Rectangle dst = {
+                            r.x + r.width / 2.0f,
+                            y + drawHeight / 2.0f,
+                            r.width,
+                            drawHeight
+                        };
+                        Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                        DrawTexturePro(rightWallTex, src, dst, origin, 0.0f, WHITE);
+                    }
+                } else {
                     DrawRectangleRec(r, GRAY);
                 }
             }
@@ -417,36 +531,121 @@ void MainGameState::render()
                 Vector2 origin = { 0.0f, 0.0f };
                 DrawTexturePro(platformTexture, src, dst, origin, 0.0f, WHITE);
             } else {
-                // Paredes laterales u otras estructuras altas
+                // Cualquier otra estructura rara
                 DrawRectangleRec(r, GRAY);
             }
         }
-        //SPRITE
-
+        //sprites
 
         DrawRectangleRec(lava.rect, ORANGE);
 
+        //sprites PU
+
+        // salto
         if (powerUp.active) {
-            DrawCircle(powerUp.x, powerUp.y, powerUp.radius, GREEN);
-            DrawCircle(powerUp.x, powerUp.y, powerUp.radius + 5, Fade(GREEN, 0.3f));
+            if (jumpPUTexture.id != 0) {
+                float size = powerUp.radius * 2.0f;
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)jumpPUTexture.width,
+                    (float)jumpPUTexture.height
+                };
+                Rectangle dst = {
+                    powerUp.x,
+                    powerUp.y,
+                    size,
+                    size
+                };
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                DrawTexturePro(jumpPUTexture, src, dst, origin, 0.0f, WHITE);
+                DrawCircle(powerUp.x, powerUp.y, powerUp.radius + 5, Fade(GREEN, 0.3f));
+            } else {
+                DrawCircle(powerUp.x, powerUp.y, powerUp.radius, GREEN);
+                DrawCircle(powerUp.x, powerUp.y, powerUp.radius + 5, Fade(GREEN, 0.3f));
+            }
         }
 
+        // escudo
         if (shieldPU.active) {
-            DrawCircle(shieldPU.x, shieldPU.y, shieldPU.radius, BLUE);
-            DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius + 6, DARKBLUE);
+            if (shieldPUWorldTexture.id != 0) {
+                float size = shieldPU.radius * 2.0f;
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)shieldPUWorldTexture.width,
+                    (float)shieldPUWorldTexture.height
+                };
+                Rectangle dst = {
+                    shieldPU.x,
+                    shieldPU.y,
+                    size,
+                    size
+                };
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                DrawTexturePro(shieldPUWorldTexture, src, dst, origin, 0.0f, WHITE);
+                DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius + 6, DARKBLUE);
+            } else {
+                DrawCircle(shieldPU.x, shieldPU.y, shieldPU.radius, BLUE);
+                DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius + 6, DARKBLUE);
+            }
         }
 
+        // slow
         if (slowPU.active) {
-            DrawCircle(slowPU.x, slowPU.y, slowPU.radius, PURPLE);
-            DrawCircle(slowPU.x, slowPU.y, slowPU.radius + 5, Fade(PURPLE, 0.3f));
+            if (slowPUTexture.id != 0) {
+                float size = slowPU.radius * 2.0f;
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)slowPUTexture.width,
+                    (float)slowPUTexture.height
+                };
+                Rectangle dst = {
+                    slowPU.x,
+                    slowPU.y,
+                    size,
+                    size
+                };
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                DrawTexturePro(slowPUTexture, src, dst, origin, 0.0f, WHITE);
+                DrawCircle(slowPU.x, slowPU.y, slowPU.radius + 5, Fade(PURPLE, 0.3f));
+            } else {
+                DrawCircle(slowPU.x, slowPU.y, slowPU.radius, PURPLE);
+                DrawCircle(slowPU.x, slowPU.y, slowPU.radius + 5, Fade(PURPLE, 0.3f));
+            }
         }
 
+        // doble puntuación
         if (doublePU.active) {
-            DrawCircle(doublePU.x, doublePU.y, doublePU.radius, GOLD);
-            DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
-        }
+            if (doublePUTexture.id != 0) {
+                float size = doublePU.radius * 2.0f;
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    (float)doublePUTexture.width,
+                    (float)doublePUTexture.height
+                };
+                Rectangle dst = {
+                    doublePU.x,
+                    doublePU.y,
+                    size,
+                    size
+                };
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
-        //SPRITE
+                DrawTexturePro(doublePUTexture, src, dst, origin, 0.0f, WHITE);
+                DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
+            } else {
+                DrawCircle(doublePU.x, doublePU.y, doublePU.radius, GOLD);
+                DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
+            }
+        }
+        //sprites PU
+
         // Puntuación usando la fuente gestionada por el ResourceManager
         {
             const char* scoreText = TextFormat("Puntuacion: %d", (int)puntuacion);
@@ -456,7 +655,6 @@ void MainGameState::render()
             };
             DrawTextEx(uiFont, scoreText, scorePos, 24.0f, 1.0f, BLACK);
         }
-        //SPRITE
 
         if (ufo.active) {
             DrawEllipse(ufo.x, ufo.y, 40, 14, GRAY);

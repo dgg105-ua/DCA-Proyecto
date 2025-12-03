@@ -40,7 +40,7 @@ void MainMenuState::init()
     float screenW = (float)GetScreenWidth();
     float screenH = (float)GetScreenHeight();
 
-    float spacing = 20.0f; // separación vertical entre botones
+    float spacing = 20.0f;
 
     // sprite play tamaño boton
     playButton = {
