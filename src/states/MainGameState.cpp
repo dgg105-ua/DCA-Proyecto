@@ -141,7 +141,7 @@ void MainGameState::init()
     doublePUTexture      = rm.getTexture("assets/img/powerups/double.png");
 
     // OVNI de rescate
-    ufoTexture = rm.getTexture("assets/img/world/ufo.png");
+    ufoTexture = ResourceManager::instance().getTexture("assets/img/world/ufo.png");
 
     // Inicializar estado de animación del jugador
     playerAnimState    = PLAYER_IDLE;
