@@ -540,25 +540,18 @@ void MainGameState::render()
         DrawRectangleRec(lava.rect, ORANGE);
 
 
-         //sprites PU
+        //sprites PU
 
         // salto
         if (powerUp.active) {
             float size = powerUp.radius * 2.0f;
 
             if (jumpPUTexture.id != 0) {
-                Rectangle src = {
-                    0.0f,
-                    0.0f,
-                    (float)jumpPUTexture.width,
-                    (float)jumpPUTexture.height
-                };
-                Rectangle dst = {
-                    powerUp.x,
-                    powerUp.y,
-                    size,
-                    size
-                };
+                Rectangle src = { 0.0f, 0.0f,
+                                  (float)jumpPUTexture.width,
+                                  (float)jumpPUTexture.height };
+                Rectangle dst = { powerUp.x, powerUp.y,
+                                  size, size };
                 Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
                 DrawTexturePro(jumpPUTexture, src, dst, origin, 0.0f, WHITE);
@@ -572,18 +565,11 @@ void MainGameState::render()
             float size = shieldPU.radius * 2.0f;
 
             if (shieldPUWorldTexture.id != 0) {
-                Rectangle src = {
-                    0.0f,
-                    0.0f,
-                    (float)shieldPUWorldTexture.width,
-                    (float)shieldPUWorldTexture.height
-                };
-                Rectangle dst = {
-                    shieldPU.x,
-                    shieldPU.y,
-                    size,
-                    size
-                };
+                Rectangle src = { 0.0f, 0.0f,
+                                  (float)shieldPUWorldTexture.width,
+                                  (float)shieldPUWorldTexture.height };
+                Rectangle dst = { shieldPU.x, shieldPU.y,
+                                  size, size };
                 Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
                 DrawTexturePro(shieldPUWorldTexture, src, dst, origin, 0.0f, WHITE);
@@ -597,18 +583,11 @@ void MainGameState::render()
             float size = slowPU.radius * 2.0f;
 
             if (slowPUTexture.id != 0) {
-                Rectangle src = {
-                    0.0f,
-                    0.0f,
-                    (float)slowPUTexture.width,
-                    (float)slowPUTexture.height
-                };
-                Rectangle dst = {
-                    slowPU.x,
-                    slowPU.y,
-                    size,
-                    size
-                };
+                Rectangle src = { 0.0f, 0.0f,
+                                  (float)slowPUTexture.width,
+                                  (float)slowPUTexture.height };
+                Rectangle dst = { slowPU.x, slowPU.y,
+                                  size, size };
                 Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
                 DrawTexturePro(slowPUTexture, src, dst, origin, 0.0f, WHITE);
@@ -622,18 +601,11 @@ void MainGameState::render()
             float size = doublePU.radius * 2.0f;
 
             if (doublePUTexture.id != 0) {
-                Rectangle src = {
-                    0.0f,
-                    0.0f,
-                    (float)doublePUTexture.width,
-                    (float)doublePUTexture.height
-                };
-                Rectangle dst = {
-                    doublePU.x,
-                    doublePU.y,
-                    size,
-                    size
-                };
+                Rectangle src = { 0.0f, 0.0f,
+                                  (float)doublePUTexture.width,
+                                  (float)doublePUTexture.height };
+                Rectangle dst = { doublePU.x, doublePU.y,
+                                  size, size };
                 Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
                 DrawTexturePro(doublePUTexture, src, dst, origin, 0.0f, WHITE);
