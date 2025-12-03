@@ -138,6 +138,10 @@ class MainGameState : public GameState
         // Fuente para el HUD gestionada por el ResourceManager
         Font uiFont{};
 
+        // Textura OVNI
+        Texture2D ufoTexture{};
+
+
         // Estado de animación del jugador
         enum PlayerAnimState { PLAYER_IDLE, PLAYER_RUN, PLAYER_JUMP };
         PlayerAnimState playerAnimState = PLAYER_IDLE;

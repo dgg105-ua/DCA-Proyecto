@@ -140,6 +140,9 @@ void MainGameState::init()
     slowPUTexture        = rm.getTexture("assets/img/powerups/slow.png");
     doublePUTexture      = rm.getTexture("assets/img/powerups/double.png");
 
+    // OVNI de rescate
+    ufoTexture = rm.getTexture("assets/img/world/ufo.png");
+
     // Inicializar estado de animación del jugador
     playerAnimState    = PLAYER_IDLE;
     playerCurrentFrame = 0;
@@ -206,9 +209,32 @@ void MainGameState::update(float deltaTime)
 
     gestionarLava(dt, lava, player, state_machine, puntuacion, estructuras);
 
+    // lava borra pu y estructuras
+    auto borraSiColisionaConLava = [&](PowerUp& pu) {
+        if (!pu.active) return;
+
+        float r = pu.radius;
+        Rectangle puRect = {
+            pu.x - r,
+            pu.y - r,
+            2.0f * r,
+            2.0f * r
+        };
+
+        if (CheckCollisionRecs(lava.rect, puRect)) {
+            pu.active = false;
+        }
+    };
+
+    borraSiColisionaConLava(powerUp);
+    borraSiColisionaConLava(shieldPU);
+    borraSiColisionaConLava(slowPU);
+    borraSiColisionaConLava(doublePU);
+
     gestionarPowerUp(powerUp, player, dt, powerUpSpawnTimer, powerUpSpawnInterval);
 
     gestionarShieldPU(shieldPU, player, dt, shieldSpawnTimer, shieldSpawnInterval, shieldActive);
+
 
     if (ufo.active) {
         actualizarRescateOVNI(player, dt, this);
@@ -654,16 +680,44 @@ void MainGameState::render()
             DrawTextEx(uiFont, scoreText, scorePos, 24.0f, 1.0f, BLACK);
         }
 
+        // OVNI
         if (ufo.active) {
-            DrawEllipse(ufo.x, ufo.y, 40, 14, GRAY);
-            DrawEllipseLines(ufo.x, ufo.y, 40, 14, DARKGRAY);
-            DrawCircle(ufo.x, ufo.y - 6, 8, LIGHTGRAY);
+            if (ufoTexture.id != 0) {
+                float spriteW = (float)ufoTexture.width;
+                float spriteH = (float)ufoTexture.height;
+
+                float scale = 1.5f;
+
+                Rectangle src = {
+                    0.0f,
+                    0.0f,
+                    spriteW,
+                    spriteH
+                };
+
+                Rectangle dst = {
+                    ufo.x,
+                    ufo.y,
+                    spriteW * scale,
+                    spriteH * scale
+                };
+
+                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+                DrawTexturePro(ufoTexture, src, dst, origin, 0.0f, WHITE);
+            } else {
+                DrawEllipse(ufo.x, ufo.y, 40, 14, GRAY);
+                DrawEllipseLines(ufo.x, ufo.y, 40, 14, DARKGRAY);
+                DrawCircle(ufo.x, ufo.y - 6, 8, LIGHTGRAY);
+            }
+
             Vector2 a = { ufo.x - 20, ufo.y + 8 };
             Vector2 b = { ufo.x + 20, ufo.y + 8 };
             Vector2 c = { player.x,   player.y + player.height/2 + 10 };
             DrawTriangle(a, b, c, Fade(SKYBLUE, 0.35f));
             DrawTriangleLines(a, b, c, Fade(DARKBLUE, 0.5f));
         }
+
 
         if (shieldActive) {
             Vector2 cc = { player.x, player.y };
