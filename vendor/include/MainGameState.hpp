@@ -141,6 +141,8 @@ class MainGameState : public GameState
         // Textura OVNI
         Texture2D ufoTexture{};
 
+        // Textura de la lava
+        Texture2D lavaTexture{};
 
         // Estado de animación del jugador
         enum PlayerAnimState { PLAYER_IDLE, PLAYER_RUN, PLAYER_JUMP };

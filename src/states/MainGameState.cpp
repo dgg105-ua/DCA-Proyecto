@@ -143,6 +143,9 @@ void MainGameState::init()
     // OVNI de rescate
     ufoTexture = ResourceManager::instance().getTexture("assets/img/world/ufo.png");
 
+    // lava
+    lavaTexture = rm.getTexture("assets/img/world/lava.png");
+
     // Inicializar estado de animación del jugador
     playerAnimState    = PLAYER_IDLE;
     playerCurrentFrame = 0;
@@ -170,6 +173,8 @@ void MainGameState::handleInput(float deltaTime)
 
 void MainGameState::update(float deltaTime)
 {
+    if (deltaTime > 0.05f) deltaTime = 0.05f;
+
     puntuacion += deltaTime * puntuacionX;
 
     timeScale = slowActive ? 0.4f : 1.0f;
@@ -563,7 +568,27 @@ void MainGameState::render()
         }
         //sprites
 
-        DrawRectangleRec(lava.rect, ORANGE);
+        if (lavaTexture.id != 0) {
+            Rectangle src = {
+                0.0f,
+                0.0f,
+                (float)lavaTexture.width,
+                (float)lavaTexture.height
+            };
+
+            Rectangle dst = {
+                lava.rect.x + lava.rect.width / 2.0f,
+                lava.rect.y + lava.rect.height / 2.0f,
+                lava.rect.width,
+                lava.rect.height
+            };
+
+            Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+
+            DrawTexturePro(lavaTexture, src, dst, origin, 0.0f, WHITE);
+        } else {
+            DrawRectangleRec(lava.rect, ORANGE);
+        }
 
 
          //sprites PU
@@ -680,40 +705,42 @@ void MainGameState::render()
             DrawTextEx(uiFont, scoreText, scorePos, 24.0f, 1.0f, BLACK);
         }
 
-        // OVNI
-        if (ufo.active) {
-            if (ufoTexture.id != 0) {
-                float spriteW = (float)ufoTexture.width;
-                float spriteH = (float)ufoTexture.height;
+        // OVNI con sprite a tamaño pequeño
+        if (ufo.active && ufoTexture.id != 0) {
+            float spriteW = (float)ufoTexture.width;
+            float spriteH = (float)ufoTexture.height;
 
-                float scale = 1.5f;
+            // Queremos algo parecido al UFO antiguo (≈80 px de ancho)
+            float targetWidth  = 80.0f;
+            float scale        = targetWidth / spriteW;
+            float targetHeight = spriteH * scale;
 
-                Rectangle src = {
-                    0.0f,
-                    0.0f,
-                    spriteW,
-                    spriteH
-                };
+            Rectangle src = {
+                0.0f,
+                0.0f,
+                spriteW,
+                spriteH
+            };
 
-                Rectangle dst = {
-                    ufo.x,
-                    ufo.y,
-                    spriteW * scale,
-                    spriteH * scale
-                };
+            Rectangle dst = {
+                ufo.x,            // centro X
+                ufo.y,            // centro Y
+                targetWidth,
+                targetHeight
+            };
 
-                Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
+            Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
-                DrawTexturePro(ufoTexture, src, dst, origin, 0.0f, WHITE);
-            } else {
-                DrawEllipse(ufo.x, ufo.y, 40, 14, GRAY);
-                DrawEllipseLines(ufo.x, ufo.y, 40, 14, DARKGRAY);
-                DrawCircle(ufo.x, ufo.y - 6, 8, LIGHTGRAY);
-            }
+            DrawTexturePro(ufoTexture, src, dst, origin, 0.0f, WHITE);
 
-            Vector2 a = { ufo.x - 20, ufo.y + 8 };
-            Vector2 b = { ufo.x + 20, ufo.y + 8 };
-            Vector2 c = { player.x,   player.y + player.height/2 + 10 };
+            // Rayo tractor debajo del ovni
+            float beamBaseY      = ufo.y + targetHeight * 0.25f;
+            float beamHalfWidth  = 20.0f;
+
+            Vector2 a = { ufo.x - beamHalfWidth, beamBaseY };
+            Vector2 b = { ufo.x + beamHalfWidth, beamBaseY };
+            Vector2 c = { player.x, player.y + player.height/2 + 10 };
+
             DrawTriangle(a, b, c, Fade(SKYBLUE, 0.35f));
             DrawTriangleLines(a, b, c, Fade(DARKBLUE, 0.5f));
         }
