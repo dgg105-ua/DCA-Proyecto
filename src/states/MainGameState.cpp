@@ -539,12 +539,14 @@ void MainGameState::render()
 
         DrawRectangleRec(lava.rect, ORANGE);
 
-        //sprites PU
+
+         //sprites PU
 
         // salto
         if (powerUp.active) {
+            float size = powerUp.radius * 2.0f;
+
             if (jumpPUTexture.id != 0) {
-                float size = powerUp.radius * 2.0f;
                 Rectangle src = {
                     0.0f,
                     0.0f,
@@ -560,17 +562,16 @@ void MainGameState::render()
                 Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
                 DrawTexturePro(jumpPUTexture, src, dst, origin, 0.0f, WHITE);
-                DrawCircle(powerUp.x, powerUp.y, powerUp.radius + 5, Fade(GREEN, 0.3f));
-            } else {
-                DrawCircle(powerUp.x, powerUp.y, powerUp.radius, GREEN);
-                DrawCircle(powerUp.x, powerUp.y, powerUp.radius + 5, Fade(GREEN, 0.3f));
             }
+
+            DrawCircleLines(powerUp.x, powerUp.y, powerUp.radius, GREEN);
         }
 
         // escudo
         if (shieldPU.active) {
+            float size = shieldPU.radius * 2.0f;
+
             if (shieldPUWorldTexture.id != 0) {
-                float size = shieldPU.radius * 2.0f;
                 Rectangle src = {
                     0.0f,
                     0.0f,
@@ -586,17 +587,16 @@ void MainGameState::render()
                 Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
                 DrawTexturePro(shieldPUWorldTexture, src, dst, origin, 0.0f, WHITE);
-                DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius + 6, DARKBLUE);
-            } else {
-                DrawCircle(shieldPU.x, shieldPU.y, shieldPU.radius, BLUE);
-                DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius + 6, DARKBLUE);
             }
+
+            DrawCircleLines(shieldPU.x, shieldPU.y, shieldPU.radius, BLUE);
         }
 
         // slow
         if (slowPU.active) {
+            float size = slowPU.radius * 2.0f;
+
             if (slowPUTexture.id != 0) {
-                float size = slowPU.radius * 2.0f;
                 Rectangle src = {
                     0.0f,
                     0.0f,
@@ -612,17 +612,16 @@ void MainGameState::render()
                 Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
                 DrawTexturePro(slowPUTexture, src, dst, origin, 0.0f, WHITE);
-                DrawCircle(slowPU.x, slowPU.y, slowPU.radius + 5, Fade(PURPLE, 0.3f));
-            } else {
-                DrawCircle(slowPU.x, slowPU.y, slowPU.radius, PURPLE);
-                DrawCircle(slowPU.x, slowPU.y, slowPU.radius + 5, Fade(PURPLE, 0.3f));
             }
+
+            DrawCircleLines(slowPU.x, slowPU.y, slowPU.radius, PURPLE);
         }
 
         // doble puntuación
         if (doublePU.active) {
+            float size = doublePU.radius * 2.0f;
+
             if (doublePUTexture.id != 0) {
-                float size = doublePU.radius * 2.0f;
                 Rectangle src = {
                     0.0f,
                     0.0f,
@@ -638,13 +637,12 @@ void MainGameState::render()
                 Vector2 origin = { dst.width / 2.0f, dst.height / 2.0f };
 
                 DrawTexturePro(doublePUTexture, src, dst, origin, 0.0f, WHITE);
-                DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
-            } else {
-                DrawCircle(doublePU.x, doublePU.y, doublePU.radius, GOLD);
-                DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
             }
+
+            DrawCircleLines(doublePU.x, doublePU.y, doublePU.radius, GOLD);
         }
         //sprites PU
+
 
         // Puntuación usando la fuente gestionada por el ResourceManager
         {
@@ -676,12 +674,7 @@ void MainGameState::render()
             DrawCircleLines((int)cc.x, (int)cc.y, r, BLUE);
             DrawCircle((int)cc.x, (int)cc.y, r + 4.0f, Fade(BLUE, 0.18f));
         }
-
-        if (doublePU.active) {
-            DrawCircle(doublePU.x, doublePU.y, doublePU.radius, GOLD);
-            DrawCircle(doublePU.x, doublePU.y, doublePU.radius + 5, Fade(GOLD, 0.3f));
-        }
-
+        
     EndMode2D();
 
     {
