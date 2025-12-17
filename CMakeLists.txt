@@ -1,23 +1,28 @@
 cmake_minimum_required(VERSION 3.10)
 project(ProjectPrime8)
 
-# Usar C++17
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Carpetas de librerías e includes
-include_directories(
-    ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_SOURCE_DIR}/vendor/include
-)
-
 # Recoger todos los .cpp de src/
 file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/src/*.cpp
 )
 
 # Crear el ejecutable
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(ProjectPrime8 ${SOURCES})
+
+message ("CONSTRUYENDO EL PROYECTO ${PROJECT_NAME}")
+set_target_properties(ProjectPrime8 PROPERTIES
+    CXX_STANDARD 17
+	VERSION 0.1.0
+)
+
+# Carpetas de librerías e includes
+target_include_directories(ProjectPrime8 PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/vendor/include)
+
+install(TARGETS ProjectPrime8 DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/dist")
+
+
+
+
 
 # Definir macro ASSET_PATH con la ruta donde se instalarán los assets
 add_definitions(-DASSET_PATH="${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/assets")
