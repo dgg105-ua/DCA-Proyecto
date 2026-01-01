@@ -4,6 +4,7 @@
 #include <cmath>
 #include <ResourceManager.hpp>
 #include <libintl.h>
+#include <locale.h>
 
 MainGameState::MainGameState()
 {
