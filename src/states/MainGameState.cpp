@@ -3,6 +3,7 @@
 #include <GameOverState.hpp>
 #include <cmath>
 #include <ResourceManager.hpp>
+#include <libintl.h>
 
 MainGameState::MainGameState()
 {
@@ -432,9 +433,9 @@ void MainGameState::render()
 
         // Dibujar tutorial
         if (tutorialVisible) {
-            const char* tutorialText =
+            const char* tutorialText = gettext(
                 "Pulsa A y D para moverte\n"
-                "ESPACIO para saltar";
+                "ESPACIO para saltar");
 
             float fontSize = 36.0f;
             float padding  = 10.0f;
@@ -758,7 +759,8 @@ void MainGameState::render()
 
         // Puntuación usando la fuente gestionada por el ResourceManager
         {
-            const char* scoreText = TextFormat("Puntuacion: %d", (int)puntuacion);
+            const char* scoreFmt = gettext("Puntuacion: %d");
+            const char* scoreText = TextFormat(scoreFmt, (int)puntuacion);
             Vector2 scorePos = {
                 camera.target.x - camera.offset.x + 10.0f,
                 camera.target.y - camera.offset.y + 10.0f
