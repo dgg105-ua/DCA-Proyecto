@@ -85,8 +85,8 @@ void MainGameState::init()
 
     // Mapa original, ancho completo
     generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);
-    generarEstructura(estructuras, 0, -10000, 80, 10000);
-    generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000);
+    generarEstructura(estructuras, 0, ultimoYParedes, 80, 10000);
+    generarEstructura(estructuras, GetScreenWidth()-80, ultimoYParedes, 80, 10000);
 
     float hudSize = 48.0f;
     float margin = 10.0f;
@@ -283,14 +283,20 @@ void MainGameState::update(float deltaTime)
     }
 
     while (ultimoY > player.y - GetScreenHeight()) {
-        float ancho = GetRandomValue(80, 150);
-        float alto = 20;
+        float ancho = 150;
+        float alto = 30;
         float x = ultimoX + GetRandomValue(-plataformasGapX, plataformasGapX);
         if (x < 80) x = GetScreenWidth()/4;
-        if (x > GetScreenWidth() - 160) x = (GetScreenWidth()/4)*3;
+        if (x > GetScreenWidth() - 80 - ancho) x = GetScreenWidth() * 0.75;
         ultimoX = x;
         generarEstructura(estructuras, x, ultimoY, ancho, alto);
         ultimoY -= plataformasGapY;
+        
+        if(ultimoY < ultimoYParedes){
+            generarEstructura(estructuras, 0, ultimoYParedes -10000, 80, 10000);
+        //  generarEstructura(estructuras, GetScreenWidth()-80, ultimoYParedes -10000, 80, 10000);
+            ultimoYParedes -= 10000;
+        }
     }
 
     gestionarDoublePU(doublePU, player, dt, doubleSpawnTimer, doubleSpawnInterval,doubleActive, doubleTimeLeft, doubleDuration, puntuacionX);
@@ -461,8 +467,8 @@ void MainGameState::render()
             bool visible =
                 (estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
                  estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200) ||
-                (estructura.rect.y < camera.target.y &&
-                 estructura.rect.y + estructura.rect.height > camera.target.y);
+                (estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200 &&
+                 estructura.rect.y + estructura.rect.height > camera.target.y - GetScreenHeight()/2 - 200);
 
             if (!visible) continue;
 
