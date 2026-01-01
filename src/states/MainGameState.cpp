@@ -153,6 +153,11 @@ void MainGameState::init()
     playerFrameSpeed   = 8.0f;
     playerFacingRight  = true;
     //sprites
+
+    // Tutorial
+    tutorialVisible = true;
+    tutorialFading  = false;
+    tutorialTransparencia = 1.0f;
 }
 
 void MainGameState::handleInput(){
@@ -175,10 +180,26 @@ void MainGameState::update(float deltaTime)
 {
     if (deltaTime > 0.05f) deltaTime = 0.05f;
 
-    puntuacion += deltaTime * puntuacionX;
+    if(lavaActiva) puntuacion += deltaTime * puntuacionX;
 
     timeScale = slowActive ? 0.4f : 1.0f;
     float dt = deltaTime * timeScale;
+
+    if (tutorialVisible && !tutorialFading) {
+        
+        if (GetKeyPressed() != 0 || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            tutorialFading = true;
+            lavaActiva = true;
+        }
+    }
+    if (tutorialFading) {
+        tutorialTransparencia -= deltaTime; // velocidad del fade
+        if (tutorialTransparencia <= 0.0f) {
+            tutorialTransparencia = 0.0f;
+            tutorialVisible = false;
+            tutorialFading = false;
+        }
+    }
 
     bool enSuelo = gestionarColisiones(estructuras, player);
 
@@ -212,7 +233,9 @@ void MainGameState::update(float deltaTime)
         player.boundingBox.y = player.y - player.height/2;
     }
 
-    gestionarLava(dt, lava, player, state_machine, puntuacion, estructuras);
+    if(lavaActiva) {
+        gestionarLava(dt, lava, player, state_machine, puntuacion, estructuras);
+    }
 
     // lava borra pu y estructuras
     auto borraSiColisionaConLava = [&](PowerUp& pu) {
@@ -399,6 +422,38 @@ void MainGameState::render()
             Vector2 origin = { destRect.width / 2.0f, destRect.height / 2.0f };
 
             DrawTexturePro(currentTexture, sourceRect, destRect, origin, 0.0f, WHITE);
+        }
+
+        // Dibujar tutorial
+        if (tutorialVisible) {
+            const char* tutorialText =
+                "Pulsa A y D para moverte\n"
+                "ESPACIO para saltar";
+
+            float fontSize = 36.0f;
+            float padding  = 10.0f;
+
+            Vector2 textSize = MeasureTextEx(uiFont, tutorialText, fontSize, 1.0f);
+
+            Rectangle box = {
+                player.x - textSize.x / 2.0f - padding,
+                player.y - player.height - textSize.y - 30.0f,
+                textSize.x + padding * 2.0f,
+                textSize.y + padding * 2.0f
+            };
+
+            Color bgColor   = Fade(BLACK, 0.7f * tutorialTransparencia);
+            Color textColor = Fade(WHITE, tutorialTransparencia);
+
+            DrawRectangleRounded(box, 0.2f, 6, bgColor);
+            DrawRectangleRoundedLines(box, 0.2f, 6, Fade(WHITE, tutorialTransparencia));
+
+            Vector2 textPos = {
+                box.x + padding,
+                box.y + padding
+            };
+
+            DrawTextEx(uiFont, tutorialText, textPos, fontSize, 1.0f, textColor);
         }
 
         // Dibujar estructuras
