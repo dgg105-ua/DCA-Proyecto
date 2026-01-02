@@ -3,6 +3,8 @@
 #include <GameOverState.hpp>
 #include <cmath>
 #include <ResourceManager.hpp>
+#include <libintl.h>
+#include <locale.h>
 
 MainGameState::MainGameState()
 {
@@ -131,8 +133,20 @@ void MainGameState::init()
     // Plataforma
     platformTexture   = rm.getTexture("assets/img/world/platform.png");
 
-    // Fuente para HUD
-    uiFont = rm.getFont("assets/fonts/ui.ttf");
+    // Fuente para HUD - Hay que cargar todos los caracteres especiales manualmente
+    int codepointsCount = 0;
+    int *codepoints = LoadCodepoints(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789"
+        "áéíóúàèìòùâêîôûçñäëïöü"
+        "ÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÇÑÄËÏÖÜ"
+        " .,;:!?()[]{}+-*/%<>=\"'\\\n",
+        &codepointsCount
+    );
+
+    uiFont = LoadFontEx("assets/fonts/ui.ttf", 48, codepoints, codepointsCount);
+    UnloadCodepoints(codepoints);
 
     // PU
     jumpPUTexture        = rm.getTexture("assets/img/powerups/jump.png");
@@ -432,9 +446,9 @@ void MainGameState::render()
 
         // Dibujar tutorial
         if (tutorialVisible) {
-            const char* tutorialText =
-                "Pulsa A y D para moverte\n"
-                "ESPACIO para saltar";
+            const char* tutorialText = gettext(
+                "Press A and D to move,\n"
+                "SPACE to jump");
 
             float fontSize = 36.0f;
             float padding  = 10.0f;
@@ -758,7 +772,8 @@ void MainGameState::render()
 
         // Puntuación usando la fuente gestionada por el ResourceManager
         {
-            const char* scoreText = TextFormat("Puntuacion: %d", (int)puntuacion);
+            const char* scoreFmt = gettext("Score: %d");
+            const char* scoreText = TextFormat(scoreFmt, (int)puntuacion);
             Vector2 scorePos = {
                 camera.target.x - camera.offset.x + 10.0f,
                 camera.target.y - camera.offset.y + 10.0f
