@@ -435,8 +435,8 @@ void MainGameState::render()
         // Dibujar tutorial
         if (tutorialVisible) {
             const char* tutorialText = gettext(
-                "Pulsa A y D para moverte\n"
-                "ESPACIO para saltar");
+                "Press A and D to move,\n"
+                "SPACE to jump");
 
             float fontSize = 36.0f;
             float padding  = 10.0f;
@@ -760,7 +760,7 @@ void MainGameState::render()
 
         // Puntuación usando la fuente gestionada por el ResourceManager
         {
-            const char* scoreFmt = gettext("Puntuacion: %d");
+            const char* scoreFmt = gettext("Score: %d");
             const char* scoreText = TextFormat(scoreFmt, (int)puntuacion);
             Vector2 scorePos = {
                 camera.target.x - camera.offset.x + 10.0f,

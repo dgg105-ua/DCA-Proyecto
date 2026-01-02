@@ -4,13 +4,22 @@
 #include <memory>
 #include <chrono>
 #include <ResourceManager.hpp>
+#include <libintl.h>
+#include <locale.h>
 
 extern "C" {
     #include <raylib.h>
 }
 
+const char* PACKAGE = "ProjectPrime8";
+const char * LOCALEDIR = "./locale";
+
 int main()
 { 
+    setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR); // Para buscar las traducciones en la carpeta LOCALEDIR
+	textdomain(PACKAGE);
+
     float delta_time = 0.0f;
 
     StateMachine state_machine = StateMachine();

@@ -169,7 +169,7 @@ void MainMenuState::render()
             DrawTexturePro(playButtonTex, srcPlay, dstPlay, Vector2{0.0f, 0.0f}, 0.0f, playTint);
         } else {
             DrawRectangleRec(playButton, (selectedOption == 0) ? GREEN : DARKGREEN);
-            char* playText = gettext("Jugar");
+            char* playText = gettext("Play");
             DrawText(playText,
                      playButton.x + (playButton.width - MeasureText(playText, 20)) / 2,
                      playButton.y + (playButton.height - 20) / 2,
@@ -182,7 +182,7 @@ void MainMenuState::render()
             DrawTexturePro(exitButtonTex, srcExit, dstExit, Vector2{0.0f, 0.0f}, 0.0f, exitTint);
         } else {
             DrawRectangleRec(exitButton, (selectedOption == 1) ? RED : MAROON);
-            char* exitText = gettext("Salir");
+            char* exitText = gettext("Exit");
             DrawText(exitText,
                      exitButton.x + (exitButton.width - MeasureText(exitText, 20)) / 2,
                      exitButton.y + (exitButton.height - 20) / 2,
