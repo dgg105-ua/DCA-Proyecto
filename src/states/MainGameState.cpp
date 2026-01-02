@@ -133,8 +133,20 @@ void MainGameState::init()
     // Plataforma
     platformTexture   = rm.getTexture("assets/img/world/platform.png");
 
-    // Fuente para HUD
-    uiFont = rm.getFont("assets/fonts/ui.ttf");
+    // Fuente para HUD - Hay que cargar todos los caracteres especiales manualmente
+    int codepointsCount = 0;
+    int *codepoints = LoadCodepoints(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789"
+        "áéíóúàèìòùâêîôûçñ"
+        "ÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÇÑ"
+        " .,;:!?()[]{}+-*/%<>=\"'\\\n",
+        &codepointsCount
+    );
+
+    uiFont = LoadFontEx("assets/fonts/ui.ttf", 48, codepoints, codepointsCount);
+    UnloadCodepoints(codepoints);
 
     // PU
     jumpPUTexture        = rm.getTexture("assets/img/powerups/jump.png");
