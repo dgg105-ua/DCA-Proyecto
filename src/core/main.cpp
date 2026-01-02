@@ -18,6 +18,7 @@ int main()
 { 
     setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR); // Para buscar las traducciones en la carpeta LOCALEDIR
+    bind_textdomain_codeset(PACKAGE, "UTF-8");
 	textdomain(PACKAGE);
 
     float delta_time = 0.0f;
