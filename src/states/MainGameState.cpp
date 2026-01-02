@@ -139,8 +139,8 @@ void MainGameState::init()
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789"
-        "áéíóúàèìòùâêîôûçñ"
-        "ÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÇÑ"
+        "áéíóúàèìòùâêîôûçñäëïöü"
+        "ÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÇÑÄËÏÖÜ"
         " .,;:!?()[]{}+-*/%<>=\"'\\\n",
         &codepointsCount
     );
