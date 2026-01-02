@@ -20,7 +20,7 @@ msgstr ""
 
 #: src/states/GameOverState.cpp:140
 msgid "GAME OVER"
-msgstr "FIN DE LA PARTIE"
+msgstr "FIN DU JEU"
 
 #: src/states/GameOverState.cpp:151
 #, c-format
