@@ -1,62 +1,78 @@
 cmake_minimum_required(VERSION 3.10)
-project(ProjectPrime8)
 
-# Recoger todos los .cpp de src/
-file(GLOB_RECURSE SOURCES
+# Requerido por raylib 5.0
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
+project(ProjectPrime8 VERSION 0.1.0)
+
+# =========================
+# C++ CONFIG
+# =========================
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+include(FetchContent)
+
+# =========================
+# RAYLIB (Windows + Linux)
+# =========================
+find_package(raylib QUIET)
+
+if(NOT raylib_FOUND)
+    message(STATUS "Raylib no encontrada, descargando...")
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+
+    FetchContent_Declare(
+        raylib
+        GIT_REPOSITORY https://github.com/raysan5/raylib.git
+        GIT_TAG 5.0
+    )
+    FetchContent_MakeAvailable(raylib)
+endif()
+
+# =========================
+# SOURCES
+# =========================
+file(GLOB_RECURSE PROJECT_SOURCES
     ${CMAKE_SOURCE_DIR}/src/*.cpp
 )
 
-# Crear el ejecutable
-add_executable(ProjectPrime8 ${SOURCES})
+# =========================
+# EXECUTABLE
+# =========================
+add_executable(ProjectPrime8 ${PROJECT_SOURCES})
 
-message ("CONSTRUYENDO EL PROYECTO ${PROJECT_NAME}")
-set_target_properties(ProjectPrime8 PROPERTIES
-    CXX_STANDARD 17
-	VERSION 0.1.0
+# =========================
+# DEFINICIONES (ASSETS)
+# =========================
+target_compile_definitions(ProjectPrime8 PRIVATE
+    ASSET_PATH="./assets/"
 )
 
-# Carpetas de librerías e includes
-target_include_directories(ProjectPrime8 PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/vendor/include)
+# =========================
+# INCLUDE PATHS (FIX MSVC)
+# =========================
+target_include_directories(ProjectPrime8 PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/vendor/include
+)
 
-install(TARGETS ProjectPrime8 DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/dist")
+# =========================
+# LINK
+# =========================
+target_link_libraries(ProjectPrime8 PRIVATE raylib)
 
-
-
-
-
-# Definir macro ASSET_PATH con la ruta donde se instalarán los assets
-add_definitions(-DASSET_PATH="${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/assets")
-
-# Carpeta con librerías precompiladas (Linux .a/.so, Windows .lib/.dll)
-link_directories(${CMAKE_SOURCE_DIR}/vendor/lib)
-
-# Dependencias por plataforma
-if(WIN32)
-    message(STATUS "Configurando para Windows")
-    target_link_libraries(${PROJECT_NAME}
-        raylib
-        winmm
-        gdi32
-    )
-elseif(UNIX)
-    message(STATUS "Configurando para Linux/Unix")
-    target_link_libraries(${PROJECT_NAME}
-        ${CMAKE_SOURCE_DIR}/vendor/lib/libraylib.a
-        GL
-        X11
-    )
-endif()
-
-# Copiar assets al build automáticamente para pruebas locales antes de instalar 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+# =========================
+# COPY ASSETS NEXT TO EXE
+# =========================
+add_custom_command(TARGET ProjectPrime8 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
+        $<TARGET_FILE_DIR:ProjectPrime8>/assets
 )
 
-# Instalar el binario
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+message(STATUS "ProjectPrime8 configurado correctamente (Windows + Linux)")
 
-# Instalar la carpeta de assets
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
-        DESTINATION share/${PROJECT_NAME})
