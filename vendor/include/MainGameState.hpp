@@ -159,7 +159,7 @@ class MainGameState : public GameState
         float playerFrameSpeed   = 12.0f;
         bool  playerFacingRight  = true;
 
-        // Tamaño de cada frame en el spritesheet y número de frames
+        // Tamaño de cada frame en el spritesheet
         static constexpr int PLAYER_SPRITE_W     = 32;
         static constexpr int PLAYER_SPRITE_H     = 32;
         static constexpr int PLAYER_IDLE_FRAMES  = 18;
