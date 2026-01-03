@@ -80,6 +80,8 @@ void MainGameState::init()
     powerUpSpawnTimer = 0.0f;
     powerUpSpawnInterval = GetRandomValue(5, 8);
 
+    plataformasGeneradas = 0;
+
     float worldWidth  = GetScreenWidth() * 0.80f;
     float marginX     = (GetScreenWidth() - worldWidth) / 2.0f;
     float wallWidth   = 80.0f;
@@ -215,6 +217,41 @@ void MainGameState::update(float deltaTime)
         }
     }
 
+    //plataformas móviles
+    player.boundingBox.x = player.x - player.width/2;
+    player.boundingBox.y = player.y - player.height/2;
+    player.boundingBox.width  = player.width;
+    player.boundingBox.height = player.height;
+
+    for (auto& e : estructuras) {
+        if (!e.moving || e.vx == 0.0f) continue;
+
+        float prevX = e.rect.x;
+        e.rect.x += e.vx * dt;
+
+        if (e.rect.x < e.minX) { e.rect.x = e.minX; e.vx = -e.vx; }
+        if (e.rect.x > e.maxX) { e.rect.x = e.maxX; e.vx = -e.vx; }
+
+        float dx = e.rect.x - prevX;
+        if (dx != 0.0f) {
+            float playerBottom = player.boundingBox.y + player.boundingBox.height;
+            float platformTop  = e.rect.y;
+
+            const float EPS = 2.0f;
+            bool overlapX =
+                (player.boundingBox.x + player.boundingBox.width > e.rect.x) &&
+                (player.boundingBox.x < e.rect.x + e.rect.width);
+
+            bool onTop = (fabsf(playerBottom - platformTop) <= EPS) && (player.vy >= 0.0f);
+
+            if (onTop && overlapX) {
+                player.x += dx;
+                player.boundingBox.x += dx;
+            }
+        }
+    }
+
+
     bool enSuelo = gestionarColisiones(estructuras, player);
 
     gestionarSalto(player, dt, enSuelo);
@@ -304,11 +341,25 @@ void MainGameState::update(float deltaTime)
         if (x > GetScreenWidth() - 80 - ancho) x = GetScreenWidth() * 0.75;
         ultimoX = x;
         generarEstructura(estructuras, x, ultimoY, ancho, alto);
+        if (GetRandomValue(1, 30) == 1) {
+            auto& e = estructuras.back();
+            e.moving = true;
+
+            e.minX = 80.0f;
+            e.maxX = (float)GetScreenWidth() - 80.0f - e.rect.width;
+
+            float speed = (float)GetRandomValue(200, 350);
+            e.vx = (GetRandomValue(0, 1) == 0) ? -speed : speed;
+
+            if (e.maxX < e.minX) {
+                e.moving = false;
+                e.vx = 0.0f;
+            }
+        }
         ultimoY -= plataformasGapY;
         
         if(ultimoY < ultimoYParedes){
             generarEstructura(estructuras, 0, ultimoYParedes -10000, 80, 10000);
-        //  generarEstructura(estructuras, GetScreenWidth()-80, ultimoYParedes -10000, 80, 10000);
             ultimoYParedes -= 10000;
         }
     }

@@ -24,6 +24,10 @@ struct Player{
 
 struct Estructura{
     Rectangle rect;
+    bool  moving = false;
+    float vx     = 0.0f;
+    float minX   = 0.0f;
+    float maxX   = 0.0f;
 };
 
 struct Lava{
@@ -167,4 +171,6 @@ class MainGameState : public GameState
         bool tutorialVisible = true;
         bool tutorialFading  = false;
         float tutorialTransparencia  = 1.0f;
+        
+        int plataformasGeneradas = 0;
 };
