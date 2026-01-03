@@ -66,7 +66,6 @@ class MainGameState : public GameState
 
         std::deque<Estructura> estructuras; // Estructuras en el juego
         Lava lava;
-        bool lavaActiva = false;
 
         // Sistema de power-ups
         PowerUp powerUp;
@@ -118,7 +117,6 @@ class MainGameState : public GameState
         float plataformasGapY = 200.0f;   // Distancia vertical entre plataformas
         float ultimoX = GetScreenWidth()/2; // Posición X de primera plataforma generada
         float ultimoY = -200; // Posición Y de primera plataforma generada
-        float ultimoYParedes = -10000; // Posición Y de última pared generada
 
         bool primerFrame = true;
 
@@ -162,9 +160,4 @@ class MainGameState : public GameState
         static constexpr int PLAYER_RUN_FRAMES   = 8;
         static constexpr int PLAYER_JUMP_FRAMES  = 4;
         //sprites
-
-        // Tutorial
-        bool tutorialVisible = true;
-        bool tutorialFading  = false;
-        float tutorialTransparencia  = 1.0f;
 };

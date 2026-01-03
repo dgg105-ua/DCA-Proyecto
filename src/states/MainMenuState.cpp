@@ -3,8 +3,6 @@
 #include <StateMachine.hpp>
 #include <MainGameState.hpp>
 #include <ResourceManager.hpp>
-#include <libintl.h>
-#include <locale.h>
 using namespace std;
 
 extern "C" {
@@ -169,9 +167,8 @@ void MainMenuState::render()
             DrawTexturePro(playButtonTex, srcPlay, dstPlay, Vector2{0.0f, 0.0f}, 0.0f, playTint);
         } else {
             DrawRectangleRec(playButton, (selectedOption == 0) ? GREEN : DARKGREEN);
-            char* playText = gettext("Play");
-            DrawText(playText,
-                     playButton.x + (playButton.width - MeasureText(playText, 20)) / 2,
+            DrawText("Play",
+                     playButton.x + (playButton.width - MeasureText("Play", 20)) / 2,
                      playButton.y + (playButton.height - 20) / 2,
                      20, WHITE);
         }
@@ -182,9 +179,8 @@ void MainMenuState::render()
             DrawTexturePro(exitButtonTex, srcExit, dstExit, Vector2{0.0f, 0.0f}, 0.0f, exitTint);
         } else {
             DrawRectangleRec(exitButton, (selectedOption == 1) ? RED : MAROON);
-            char* exitText = gettext("Exit");
-            DrawText(exitText,
-                     exitButton.x + (exitButton.width - MeasureText(exitText, 20)) / 2,
+            DrawText("Exit",
+                     exitButton.x + (exitButton.width - MeasureText("Exit", 20)) / 2,
                      exitButton.y + (exitButton.height - 20) / 2,
                      20, WHITE);
         }

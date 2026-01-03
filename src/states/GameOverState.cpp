@@ -4,8 +4,6 @@
 #include <MainMenuState.hpp>
 #include <StateMachine.hpp>
 #include <ResourceManager.hpp>
-#include <libintl.h>
-#include <locale.h>
 using namespace std;
 
 extern "C" {
@@ -137,7 +135,7 @@ void GameOverState::render()
         }
 
         // Título y puntuación
-        const char* gameOverText = gettext("GAME OVER");
+        const char* gameOverText = "GAME OVER";
         float titleFontSize = 72.0f;
         float titleSpacing  = 2.0f;
         Vector2 titleSize = MeasureTextEx(uiFont, gameOverText, titleFontSize, titleSpacing);
@@ -148,7 +146,7 @@ void GameOverState::render()
         DrawTextEx(uiFont, gameOverText, titlePos, titleFontSize, titleSpacing, RAYWHITE);
 
         char scoreText[64];
-        snprintf(scoreText, sizeof(scoreText), gettext("SCORE: %d"), puntuacion);
+        snprintf(scoreText, sizeof(scoreText), "PUNTUACION: %d", puntuacion);
         float scoreFontSize = 36.0f;
         float scoreSpacing  = 1.5f;
         Vector2 scoreSize = MeasureTextEx(uiFont, scoreText, scoreFontSize, scoreSpacing);
@@ -172,7 +170,7 @@ void GameOverState::render()
             DrawTexturePro(newGameButtonTex, srcNew, dstNew, Vector2{0.0f, 0.0f}, 0.0f, newTint);
         } else {
             DrawRectangleRec(playAgainButton, (selectedOption == 0) ? GREEN : DARKGREEN);
-            const char* txt = gettext("PLAY AGAIN");
+            const char* txt = "PLAY AGAIN";
             DrawText(txt,
                      playAgainButton.x + (playAgainButton.width  - MeasureText(txt, 20)) / 2,
                      playAgainButton.y + (playAgainButton.height - 20) / 2,
@@ -186,7 +184,7 @@ void GameOverState::render()
             DrawTexturePro(menuButtonTex, srcMenu, dstMenu, Vector2{0.0f, 0.0f}, 0.0f, menuTint);
         } else {
             DrawRectangleRec(returnToMenuButton, (selectedOption == 1) ? ORANGE : BROWN);
-            const char* txt = gettext("RETURN TO MENU");
+            const char* txt = "RETURN TO MENU";
             DrawText(txt,
                      returnToMenuButton.x + (returnToMenuButton.width  - MeasureText(txt, 20)) / 2,
                      returnToMenuButton.y + (returnToMenuButton.height - 20) / 2,
