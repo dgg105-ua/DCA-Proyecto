@@ -36,16 +36,25 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # ----------------------------------------
 # Ruta de recursos (compile-time)
 # ----------------------------------------
+option(USE_SOURCE_ASSETS "Use assets from source tree at runtime (for development)" ON)
+
 if (WIN32)
     # En Windows se usan assets locales
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         RESOURCE_PATH="assets/"
     )
 else()
-    # En Linux instalado
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-        RESOURCE_PATH="/usr/share/${PROJECT_NAME}/assets/"
-    )
+    if (USE_SOURCE_ASSETS)
+        # Durante desarrollo usar assets del árbol fuente
+        target_compile_definitions(${PROJECT_NAME} PRIVATE
+            RESOURCE_PATH="${CMAKE_SOURCE_DIR}/assets/"
+        )
+    else()
+        # En Linux instalado
+        target_compile_definitions(${PROJECT_NAME} PRIVATE
+            RESOURCE_PATH="/usr/share/${PROJECT_NAME}/assets/"
+        )
+    endif()
 endif()
 
 # ----------------------------------------
@@ -75,7 +84,7 @@ if (WIN32)
 
 elseif (UNIX)
     target_link_libraries(${PROJECT_NAME} PRIVATE
-        ${CMAKE_SOURCE_DIR}/vendor/lib/linux/libraylib.a
+        ${CMAKE_SOURCE_DIR}/vendor/lib/libraylib.a
         GL
         X11
         pthread
