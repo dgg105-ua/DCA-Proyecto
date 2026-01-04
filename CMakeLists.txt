@@ -124,3 +124,12 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/locale
     DESTINATION share/${PROJECT_NAME}
 )
+
+# ----------------------------------------
+# Uninstall (make uninstall)
+# ----------------------------------------
+add_custom_target(uninstall
+    COMMAND /usr/bin/sudo rm -rf ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
+    COMMAND /usr/bin/sudo rm -f ${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}
+    COMMENT "Removing ${PROJECT_NAME} from ${CMAKE_INSTALL_PREFIX} (may ask for sudo password)"
+)
