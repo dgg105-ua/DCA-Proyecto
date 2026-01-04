@@ -23,14 +23,14 @@ void MainMenuState::init()
     ResourceManager& rm = ResourceManager::instance();
 
     // Fondo del menú
-    menuBackgroundTex = rm.getTexture("assets/img/menu/menu_background.png");
+    menuBackgroundTex = rm.getTexture(ResourceManager::getResourcePath("img/menu/menu_background.png"));
 
     // Botones exit y play (imagenes)
-    playButtonTex = rm.getTexture("assets/img/menu/Play Button.png");
-    exitButtonTex = rm.getTexture("assets/img/menu/Exit Button.png");
+    playButtonTex = rm.getTexture(ResourceManager::getResourcePath("img/menu/Play Button.png"));
+    exitButtonTex = rm.getTexture(ResourceManager::getResourcePath("img/menu/Exit Button.png"));
 
     // Fuente para el título del juego
-    uiFont = rm.getFont("assets/fonts/ui.ttf");
+    uiFont = rm.getFont(ResourceManager::getResourcePath("fonts/ui.ttf"));
 
 
     // Tamaños botones
