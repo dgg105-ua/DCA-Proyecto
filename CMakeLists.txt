@@ -36,7 +36,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 # ----------------------------------------
 # Ruta de recursos (compile-time)
 # ----------------------------------------
-option(USE_SOURCE_ASSETS "Use assets from source tree at runtime (for development)" ON)
+option(USE_SOURCE_ASSETS "Usar los assets del árbol fuente (para desarrollo)" ON)
 
 if (WIN32)
     # En Windows se usan assets locales
