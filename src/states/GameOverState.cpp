@@ -22,7 +22,7 @@ void GameOverState::init()
     // Cargar recursos gráficos del Game Over con el gestor de recursos
     ResourceManager& rm = ResourceManager::instance();
 
-    goBackgroundTex   = rm.getTexture(ResourceManager::getResourcePath("img/gameover/gameover_background.jpg"));
+    goBackgroundTex   = rm.getTexture(ResourceManager::getResourcePath("img/gameover/gameover_background.png"));
     newGameButtonTex  = rm.getTexture(ResourceManager::getResourcePath("img/gameover/New game Button.png"));
     menuButtonTex     = rm.getTexture(ResourceManager::getResourcePath("img/gameover/Menu Button.png"));
     uiFont            = rm.getFont(ResourceManager::getResourcePath("fonts/ui.ttf"));

@@ -115,7 +115,7 @@ void MainGameState::init()
     playerJumpTexture = rm.getTexture(ResourceManager::getResourcePath("img/player/Jump.png"));
 
     // Plataforma
-    platformTexture   = rm.getTexture(ResourceManager::getResourcePath("img/world/platform.jpg"));
+    platformTexture   = rm.getTexture(ResourceManager::getResourcePath("img/world/platform.png"));
 
     // Fuente para HUD
     uiFont = rm.getFont(ResourceManager::getResourcePath("fonts/ui.ttf"));
@@ -315,7 +315,7 @@ void MainGameState::render()
         // Fondo del nivel
         {
             ResourceManager& rm = ResourceManager::instance();
-            Texture2D bgTex = rm.getTexture(ResourceManager::getResourcePath("img/world/background.jpg"));
+            Texture2D bgTex = rm.getTexture(ResourceManager::getResourcePath("img/world/background.png"));
 
             if (bgTex.id != 0) {
                 float screenW = (float)GetScreenWidth();
@@ -414,7 +414,7 @@ void MainGameState::render()
 
             if (isFloor) {
                 ResourceManager& rm = ResourceManager::instance();
-                Texture2D floorTexture = rm.getTexture(ResourceManager::getResourcePath("img/world/floor.jpg"));
+                Texture2D floorTexture = rm.getTexture(ResourceManager::getResourcePath("img/world/floor.png"));
 
                 if (floorTexture.id != 0) {
                     float scale     = r.height / (float)floorTexture.height;
@@ -453,7 +453,7 @@ void MainGameState::render()
             }
             else if (isLeftWall) {
                 ResourceManager& rm = ResourceManager::instance();
-                Texture2D leftWallTex = rm.getTexture(ResourceManager::getResourcePath("img/world/wallizq.jpg"));
+                Texture2D leftWallTex = rm.getTexture(ResourceManager::getResourcePath("img/world/wallizq.png"));
 
                 if (leftWallTex.id != 0) {
                     float scale      = r.width / (float)leftWallTex.width;
@@ -492,7 +492,7 @@ void MainGameState::render()
             }
             else if (isRightWall) {
                 ResourceManager& rm = ResourceManager::instance();
-                Texture2D rightWallTex = rm.getTexture(ResourceManager::getResourcePath("img/world/wallder.jpg"));
+                Texture2D rightWallTex = rm.getTexture(ResourceManager::getResourcePath("img/world/wallder.png"));
 
                 if (rightWallTex.id != 0) {
                     float scale      = r.width / (float)rightWallTex.width;

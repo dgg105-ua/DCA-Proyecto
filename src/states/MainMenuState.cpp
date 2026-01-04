@@ -21,7 +21,7 @@ void MainMenuState::init()
     ResourceManager& rm = ResourceManager::instance();
 
     // Fondo del menú
-    menuBackgroundTex = rm.getTexture(ResourceManager::getResourcePath("img/menu/menu_background.jpg"));
+    menuBackgroundTex = rm.getTexture(ResourceManager::getResourcePath("img/menu/menu_background.png"));
 
     // Botones exit y play (imagenes)
     playButtonTex = rm.getTexture(ResourceManager::getResourcePath("img/menu/Play Button.png"));
