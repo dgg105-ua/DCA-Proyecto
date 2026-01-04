@@ -22,10 +22,10 @@ void GameOverState::init()
     // Cargar recursos gráficos del Game Over con el gestor de recursos
     ResourceManager& rm = ResourceManager::instance();
 
-    goBackgroundTex   = rm.getTexture("assets/img/gameover/gameover_background.png");
-    newGameButtonTex  = rm.getTexture("assets/img/gameover/New game Button.png");
-    menuButtonTex     = rm.getTexture("assets/img/gameover/Menu Button.png");
-    uiFont            = rm.getFont("assets/fonts/ui.ttf");
+    goBackgroundTex   = rm.getTexture(ResourceManager::getResourcePath("img/gameover/gameover_background.jpg"));
+    newGameButtonTex  = rm.getTexture(ResourceManager::getResourcePath("img/gameover/New game Button.png"));
+    menuButtonTex     = rm.getTexture(ResourceManager::getResourcePath("img/gameover/Menu Button.png"));
+    uiFont            = rm.getFont(ResourceManager::getResourcePath("fonts/ui.ttf"));
 
     // sprite = tamaño del boton
     float newW  = (newGameButtonTex.id != 0) ? (float)newGameButtonTex.width  : 250.0f;

@@ -95,56 +95,42 @@ void MainGameState::init()
     hudSlowRect   = { screenW - (hudSize*2.0f) - (margin*2.0f), margin, hudSize, hudSize };
     hudDoubleRect = { screenW - (hudSize*3.0f) - (margin*3.0f), margin, hudSize, hudSize };
 
-    const char* SHIELD_CANDIDATES[] = {
-        "assets/img/powerupsc/shield.png",
-        "src/assets/img/powerupsc/shield.png"
-    };
-    for (const char* p : SHIELD_CANDIDATES) {
-        if (FileExists(p)) { hudShieldTex = LoadTexture(p); hudShieldLoaded = (hudShieldTex.id != 0); break; }
-    }
-
-    const char* SLOW_CANDIDATES[] = {
-        "assets/img/powerupsc/slow.png",
-        "src/assets/img/powerupsc/slow.png"
-    };
-    for (const char* p : SLOW_CANDIDATES) {
-        if (FileExists(p)) { hudSlowTex = LoadTexture(p); hudSlowLoaded = (hudSlowTex.id != 0); break; }
-    }
-
-    const char* DOUBLE_CANDIDATES[] = {
-        "assets/img/powerupsc/double.png",
-        "src/assets/img/powerupsc/double.png"
-    };
-    for (const char* p : DOUBLE_CANDIDATES) {
-        if (FileExists(p)) { hudDoubleTex = LoadTexture(p); hudDoubleLoaded = (hudDoubleTex.id != 0); break; }
-    }
-
     //sprites
     // Cargar sprites a través del gestor de recursos 
     ResourceManager& rm = ResourceManager::instance();
 
+    // Texturas del HUD para power-ups
+    hudShieldTex = rm.getTexture(ResourceManager::getResourcePath("img/powerupsc/shield.png"));
+    hudShieldLoaded = (hudShieldTex.id != 0);
+    
+    hudSlowTex = rm.getTexture(ResourceManager::getResourcePath("img/powerupsc/slow.png"));
+    hudSlowLoaded = (hudSlowTex.id != 0);
+    
+    hudDoubleTex = rm.getTexture(ResourceManager::getResourcePath("img/powerupsc/double.png"));
+    hudDoubleLoaded = (hudDoubleTex.id != 0);
+
     // Personaje
-    playerIdleTexture = rm.getTexture("assets/img/player/Idle.png");
-    playerRunTexture  = rm.getTexture("assets/img/player/Run.png");
-    playerJumpTexture = rm.getTexture("assets/img/player/Jump.png");
+    playerIdleTexture = rm.getTexture(ResourceManager::getResourcePath("img/player/Idle.png"));
+    playerRunTexture  = rm.getTexture(ResourceManager::getResourcePath("img/player/Run.png"));
+    playerJumpTexture = rm.getTexture(ResourceManager::getResourcePath("img/player/Jump.png"));
 
     // Plataforma
-    platformTexture   = rm.getTexture("assets/img/world/platform.png");
+    platformTexture   = rm.getTexture(ResourceManager::getResourcePath("img/world/platform.jpg"));
 
     // Fuente para HUD
-    uiFont = rm.getFont("assets/fonts/ui.ttf");
+    uiFont = rm.getFont(ResourceManager::getResourcePath("fonts/ui.ttf"));
 
     // PU
-    jumpPUTexture        = rm.getTexture("assets/img/powerups/jump.png");
-    shieldPUWorldTexture = rm.getTexture("assets/img/powerups/shield.png");
-    slowPUTexture        = rm.getTexture("assets/img/powerups/slow.png");
-    doublePUTexture      = rm.getTexture("assets/img/powerups/double.png");
+    jumpPUTexture        = rm.getTexture(ResourceManager::getResourcePath("img/powerups/jump.png"));
+    shieldPUWorldTexture = rm.getTexture(ResourceManager::getResourcePath("img/powerups/shield.png"));
+    slowPUTexture        = rm.getTexture(ResourceManager::getResourcePath("img/powerups/slow.png"));
+    doublePUTexture      = rm.getTexture(ResourceManager::getResourcePath("img/powerups/double.png"));
 
     // OVNI de rescate
-    ufoTexture = ResourceManager::instance().getTexture("assets/img/world/ufo.png");
+    ufoTexture = ResourceManager::instance().getTexture(ResourceManager::getResourcePath("img/world/ufo.png"));
 
     // lava
-    lavaTexture = rm.getTexture("assets/img/world/lava.png");
+    lavaTexture = rm.getTexture(ResourceManager::getResourcePath("img/world/lava.png"));
 
     // Inicializar estado de animación del jugador
     playerAnimState    = PLAYER_IDLE;
@@ -329,7 +315,7 @@ void MainGameState::render()
         // Fondo del nivel
         {
             ResourceManager& rm = ResourceManager::instance();
-            Texture2D bgTex = rm.getTexture("assets/img/world/background.png");
+            Texture2D bgTex = rm.getTexture(ResourceManager::getResourcePath("img/world/background.jpg"));
 
             if (bgTex.id != 0) {
                 float screenW = (float)GetScreenWidth();
@@ -428,7 +414,7 @@ void MainGameState::render()
 
             if (isFloor) {
                 ResourceManager& rm = ResourceManager::instance();
-                Texture2D floorTexture = rm.getTexture("assets/img/world/floor.png");
+                Texture2D floorTexture = rm.getTexture(ResourceManager::getResourcePath("img/world/floor.jpg"));
 
                 if (floorTexture.id != 0) {
                     float scale     = r.height / (float)floorTexture.height;
@@ -467,7 +453,7 @@ void MainGameState::render()
             }
             else if (isLeftWall) {
                 ResourceManager& rm = ResourceManager::instance();
-                Texture2D leftWallTex = rm.getTexture("assets/img/world/wallizq.png");
+                Texture2D leftWallTex = rm.getTexture(ResourceManager::getResourcePath("img/world/wallizq.jpg"));
 
                 if (leftWallTex.id != 0) {
                     float scale      = r.width / (float)leftWallTex.width;
@@ -506,7 +492,7 @@ void MainGameState::render()
             }
             else if (isRightWall) {
                 ResourceManager& rm = ResourceManager::instance();
-                Texture2D rightWallTex = rm.getTexture("assets/img/world/wallder.png");
+                Texture2D rightWallTex = rm.getTexture(ResourceManager::getResourcePath("img/world/wallder.jpg"));
 
                 if (rightWallTex.id != 0) {
                     float scale      = r.width / (float)rightWallTex.width;

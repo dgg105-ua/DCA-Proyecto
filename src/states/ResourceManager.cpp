@@ -1,10 +1,20 @@
 #include <ResourceManager.hpp>
 #include <iostream>
 
+// Define RESOURCE_PATH si no está definida (fallback)
+#ifndef RESOURCE_PATH
+    #define RESOURCE_PATH "assets/"
+#endif
+
 //SPRITE
 ResourceManager& ResourceManager::instance() {
     static ResourceManager rm;
     return rm;
+}
+
+std::string ResourceManager::getResourcePath(const std::string& relativePath) {
+    std::string fullPath = std::string(RESOURCE_PATH) + relativePath;
+    return fullPath;
 }
 
 Texture2D& ResourceManager::getTexture(const std::string& path) {

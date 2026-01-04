@@ -13,6 +13,9 @@ public:
     // Acceso único al gestor (singleton)
     static ResourceManager& instance();
 
+    // Combina RESOURCE_PATH con una ruta relativa
+    static std::string getResourcePath(const std::string& relativePath);
+
     // Devuelve una textura cargada. Si no está, la carga y la guarda.
     Texture2D& getTexture(const std::string& path);
 
