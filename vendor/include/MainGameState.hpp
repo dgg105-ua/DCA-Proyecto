@@ -24,6 +24,10 @@ struct Player{
 
 struct Estructura{
     Rectangle rect;
+    bool  moving = false;
+    float vx     = 0.0f;
+    float minX   = 0.0f;
+    float maxX   = 0.0f;
 };
 
 struct Lava{
@@ -155,7 +159,7 @@ class MainGameState : public GameState
         float playerFrameSpeed   = 12.0f;
         bool  playerFacingRight  = true;
 
-        // Tamaño de cada frame en el spritesheet y número de frames
+        // Tamaño de cada frame en el spritesheet
         static constexpr int PLAYER_SPRITE_W     = 32;
         static constexpr int PLAYER_SPRITE_H     = 32;
         static constexpr int PLAYER_IDLE_FRAMES  = 18;
@@ -167,4 +171,6 @@ class MainGameState : public GameState
         bool tutorialVisible = true;
         bool tutorialFading  = false;
         float tutorialTransparencia  = 1.0f;
+        
+        int plataformasGeneradas = 0;
 };
