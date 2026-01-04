@@ -102,6 +102,13 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
 )
 
+# Copiar también las traducciones (locale) al directorio del ejecutable
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/locale
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/locale
+)
+
 # ----------------------------------------
 # Instalación
 # ----------------------------------------
@@ -110,5 +117,10 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+    DESTINATION share/${PROJECT_NAME}
+)
+
+# Instalar también las traducciones
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/locale
     DESTINATION share/${PROJECT_NAME}
 )
