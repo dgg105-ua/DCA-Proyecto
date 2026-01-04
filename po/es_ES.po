@@ -1,0 +1,57 @@
+# Spanish translations for PACKAGE package
+# Traducciones al español para el paquete PACKAGE.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Daniel <daniel@daniel-ideapad-3-14alc6>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-02 17:29+0100\n"
+"PO-Revision-Date: 2026-01-02 17:29+0100\n"
+"Last-Translator: Daniel <daniel@daniel-ideapad-3-14alc6>\n"
+"Language-Team: Spanish <es@tp.org.es>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/states/GameOverState.cpp:140
+msgid "GAME OVER"
+msgstr "FIN DEL JUEGO"
+
+#: src/states/GameOverState.cpp:151
+#, c-format
+msgid "SCORE: %d"
+msgstr "PUNTUACIÓN: %d"
+
+#: src/states/GameOverState.cpp:175
+msgid "PLAY AGAIN"
+msgstr "VOLVER A JUGAR"
+
+#: src/states/GameOverState.cpp:189
+msgid "RETURN TO MENU"
+msgstr "VOLVER AL MENÚ"
+
+#: src/states/MainGameState.cpp:438
+msgid ""
+"Press A and D to move,\n"
+"SPACE to jump"
+msgstr ""
+"Pulsa A y D para moverte,\n"
+"ESPACIO para saltar"
+
+#: src/states/MainGameState.cpp:763
+#, c-format
+msgid "Score: %d"
+msgstr "Puntuación: %d"
+
+#: src/states/MainMenuState.cpp:172
+msgid "Play"
+msgstr "Jugar"
+
+#: src/states/MainMenuState.cpp:185
+msgid "Exit"
+msgstr "Salir"

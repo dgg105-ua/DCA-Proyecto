@@ -24,6 +24,10 @@ struct Player{
 
 struct Estructura{
     Rectangle rect;
+    bool  moving = false;
+    float vx     = 0.0f;
+    float minX   = 0.0f;
+    float maxX   = 0.0f;
 };
 
 struct Lava{
@@ -66,6 +70,7 @@ class MainGameState : public GameState
 
         std::deque<Estructura> estructuras; // Estructuras en el juego
         Lava lava;
+        bool lavaActiva = false;
 
         // Sistema de power-ups
         PowerUp powerUp;
@@ -117,6 +122,7 @@ class MainGameState : public GameState
         float plataformasGapY = 200.0f;   // Distancia vertical entre plataformas
         float ultimoX = GetScreenWidth()/2; // Posición X de primera plataforma generada
         float ultimoY = -200; // Posición Y de primera plataforma generada
+        float ultimoYParedes = -10000; // Posición Y de última pared generada
 
         bool primerFrame = true;
 
@@ -153,11 +159,18 @@ class MainGameState : public GameState
         float playerFrameSpeed   = 12.0f;
         bool  playerFacingRight  = true;
 
-        // Tamaño de cada frame en el spritesheet y número de frames
+        // Tamaño de cada frame en el spritesheet
         static constexpr int PLAYER_SPRITE_W     = 32;
         static constexpr int PLAYER_SPRITE_H     = 32;
         static constexpr int PLAYER_IDLE_FRAMES  = 18;
         static constexpr int PLAYER_RUN_FRAMES   = 8;
         static constexpr int PLAYER_JUMP_FRAMES  = 4;
         //sprites
+
+        // Tutorial
+        bool tutorialVisible = true;
+        bool tutorialFading  = false;
+        float tutorialTransparencia  = 1.0f;
+        
+        int plataformasGeneradas = 0;
 };

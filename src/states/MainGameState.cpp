@@ -3,6 +3,8 @@
 #include <GameOverState.hpp>
 #include <cmath>
 #include <ResourceManager.hpp>
+#include <libintl.h>
+#include <locale.h>
 
 MainGameState::MainGameState()
 {
@@ -78,6 +80,8 @@ void MainGameState::init()
     powerUpSpawnTimer = 0.0f;
     powerUpSpawnInterval = GetRandomValue(5, 8);
 
+    plataformasGeneradas = 0;
+
     float worldWidth  = GetScreenWidth() * 0.80f;
     float marginX     = (GetScreenWidth() - worldWidth) / 2.0f;
     float wallWidth   = 80.0f;
@@ -85,8 +89,8 @@ void MainGameState::init()
 
     // Mapa original, ancho completo
     generarEstructura(estructuras, 0, -50, GetScreenWidth(), 50);
-    generarEstructura(estructuras, 0, -10000, 80, 10000);
-    generarEstructura(estructuras, GetScreenWidth()-80, -10000, 80, 10000);
+    generarEstructura(estructuras, 0, ultimoYParedes, 80, 10000);
+    generarEstructura(estructuras, GetScreenWidth()-80, ultimoYParedes, 80, 10000);
 
     float hudSize = 48.0f;
     float margin = 10.0f;
@@ -117,8 +121,20 @@ void MainGameState::init()
     // Plataforma
     platformTexture   = rm.getTexture(ResourceManager::getResourcePath("img/world/platform.png"));
 
-    // Fuente para HUD
-    uiFont = rm.getFont(ResourceManager::getResourcePath("fonts/ui.ttf"));
+    // Fuente para HUD - Hay que cargar todos los caracteres especiales manualmente
+    int codepointsCount = 0;
+    int *codepoints = LoadCodepoints(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789"
+        "áéíóúàèìòùâêîôûçñäëïöü"
+        "ÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÇÑÄËÏÖÜ"
+        " .,;:!?()[]{}+-*/%<>=\"'\\\n",
+        &codepointsCount
+    );
+
+    uiFont = LoadFontEx("assets/fonts/ui.ttf", 48, codepoints, codepointsCount);
+    UnloadCodepoints(codepoints);
 
     // PU
     jumpPUTexture        = rm.getTexture(ResourceManager::getResourcePath("img/powerups/jump.png"));
@@ -139,6 +155,11 @@ void MainGameState::init()
     playerFrameSpeed   = 8.0f;
     playerFacingRight  = true;
     //sprites
+
+    // Tutorial
+    tutorialVisible = true;
+    tutorialFading  = false;
+    tutorialTransparencia = 1.0f;
 }
 
 void MainGameState::handleInput(){
@@ -161,10 +182,61 @@ void MainGameState::update(float deltaTime)
 {
     if (deltaTime > 0.05f) deltaTime = 0.05f;
 
-    puntuacion += deltaTime * puntuacionX;
+    if(lavaActiva) puntuacion += deltaTime * puntuacionX;
 
     timeScale = slowActive ? 0.4f : 1.0f;
     float dt = deltaTime * timeScale;
+
+    if (tutorialVisible && !tutorialFading) {
+        
+        if (GetKeyPressed() != 0 || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            tutorialFading = true;
+            lavaActiva = true;
+        }
+    }
+    if (tutorialFading) {
+        tutorialTransparencia -= deltaTime; // velocidad del fade
+        if (tutorialTransparencia <= 0.0f) {
+            tutorialTransparencia = 0.0f;
+            tutorialVisible = false;
+            tutorialFading = false;
+        }
+    }
+
+    //plataformas móviles
+    player.boundingBox.x = player.x - player.width/2;
+    player.boundingBox.y = player.y - player.height/2;
+    player.boundingBox.width  = player.width;
+    player.boundingBox.height = player.height;
+
+    for (auto& e : estructuras) {
+        if (!e.moving || e.vx == 0.0f) continue;
+
+        float prevX = e.rect.x;
+        e.rect.x += e.vx * dt;
+
+        if (e.rect.x < e.minX) { e.rect.x = e.minX; e.vx = -e.vx; }
+        if (e.rect.x > e.maxX) { e.rect.x = e.maxX; e.vx = -e.vx; }
+
+        float dx = e.rect.x - prevX;
+        if (dx != 0.0f) {
+            float playerBottom = player.boundingBox.y + player.boundingBox.height;
+            float platformTop  = e.rect.y;
+
+            const float EPS = 2.0f;
+            bool overlapX =
+                (player.boundingBox.x + player.boundingBox.width > e.rect.x) &&
+                (player.boundingBox.x < e.rect.x + e.rect.width);
+
+            bool onTop = (fabsf(playerBottom - platformTop) <= EPS) && (player.vy >= 0.0f);
+
+            if (onTop && overlapX) {
+                player.x += dx;
+                player.boundingBox.x += dx;
+            }
+        }
+    }
+
 
     bool enSuelo = gestionarColisiones(estructuras, player);
 
@@ -198,7 +270,9 @@ void MainGameState::update(float deltaTime)
         player.boundingBox.y = player.y - player.height/2;
     }
 
-    gestionarLava(dt, lava, player, state_machine, puntuacion, estructuras);
+    if(lavaActiva) {
+        gestionarLava(dt, lava, player, state_machine, puntuacion, estructuras);
+    }
 
     // lava borra pu y estructuras
     auto borraSiColisionaConLava = [&](PowerUp& pu) {
@@ -246,14 +320,34 @@ void MainGameState::update(float deltaTime)
     }
 
     while (ultimoY > player.y - GetScreenHeight()) {
-        float ancho = GetRandomValue(80, 150);
-        float alto = 20;
+        float ancho = 150;
+        float alto = 30;
         float x = ultimoX + GetRandomValue(-plataformasGapX, plataformasGapX);
         if (x < 80) x = GetScreenWidth()/4;
-        if (x > GetScreenWidth() - 160) x = (GetScreenWidth()/4)*3;
+        if (x > GetScreenWidth() - 80 - ancho) x = GetScreenWidth() * 0.75;
         ultimoX = x;
         generarEstructura(estructuras, x, ultimoY, ancho, alto);
+        if (GetRandomValue(1, 30) == 1) {
+            auto& e = estructuras.back();
+            e.moving = true;
+
+            e.minX = 80.0f;
+            e.maxX = (float)GetScreenWidth() - 80.0f - e.rect.width;
+
+            float speed = (float)GetRandomValue(200, 350);
+            e.vx = (GetRandomValue(0, 1) == 0) ? -speed : speed;
+
+            if (e.maxX < e.minX) {
+                e.moving = false;
+                e.vx = 0.0f;
+            }
+        }
         ultimoY -= plataformasGapY;
+        
+        if(ultimoY < ultimoYParedes){
+            generarEstructura(estructuras, 0, ultimoYParedes -10000, 80, 10000);
+            ultimoYParedes -= 10000;
+        }
     }
 
     gestionarDoublePU(doublePU, player, dt, doubleSpawnTimer, doubleSpawnInterval,doubleActive, doubleTimeLeft, doubleDuration, puntuacionX);
@@ -387,13 +481,45 @@ void MainGameState::render()
             DrawTexturePro(currentTexture, sourceRect, destRect, origin, 0.0f, WHITE);
         }
 
+        // Dibujar tutorial
+        if (tutorialVisible) {
+            const char* tutorialText = gettext(
+                "Press A and D to move,\n"
+                "SPACE to jump");
+
+            float fontSize = 36.0f;
+            float padding  = 10.0f;
+
+            Vector2 textSize = MeasureTextEx(uiFont, tutorialText, fontSize, 1.0f);
+
+            Rectangle box = {
+                player.x - textSize.x / 2.0f - padding,
+                player.y - player.height - textSize.y - 30.0f,
+                textSize.x + padding * 2.0f,
+                textSize.y + padding * 2.0f
+            };
+
+            Color bgColor   = Fade(BLACK, 0.7f * tutorialTransparencia);
+            Color textColor = Fade(WHITE, tutorialTransparencia);
+
+            DrawRectangleRounded(box, 0.2f, 6, bgColor);
+            DrawRectangleRoundedLines(box, 0.2f, 6, Fade(WHITE, tutorialTransparencia));
+
+            Vector2 textPos = {
+                box.x + padding,
+                box.y + padding
+            };
+
+            DrawTextEx(uiFont, tutorialText, textPos, fontSize, 1.0f, textColor);
+        }
+
         // Dibujar estructuras
         for (auto& estructura : estructuras) {
             bool visible =
                 (estructura.rect.y > camera.target.y - GetScreenHeight()/2 - 200 &&
                  estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200) ||
-                (estructura.rect.y < camera.target.y &&
-                 estructura.rect.y + estructura.rect.height > camera.target.y);
+                (estructura.rect.y < camera.target.y + GetScreenHeight()/2 + 200 &&
+                 estructura.rect.y + estructura.rect.height > camera.target.y - GetScreenHeight()/2 - 200);
 
             if (!visible) continue;
 
@@ -683,7 +809,8 @@ void MainGameState::render()
 
         // Puntuación usando la fuente gestionada por el ResourceManager
         {
-            const char* scoreText = TextFormat("Puntuacion: %d", (int)puntuacion);
+            const char* scoreFmt = gettext("Score: %d");
+            const char* scoreText = TextFormat(scoreFmt, (int)puntuacion);
             Vector2 scorePos = {
                 camera.target.x - camera.offset.x + 10.0f,
                 camera.target.y - camera.offset.y + 10.0f
