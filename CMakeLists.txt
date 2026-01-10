@@ -110,6 +110,12 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 )
 
 # ----------------------------------------
+# Testing
+# ----------------------------------------
+enable_testing()
+add_subdirectory(tests)
+
+# ----------------------------------------
 # Instalación
 # ----------------------------------------
 install(TARGETS ${PROJECT_NAME}
