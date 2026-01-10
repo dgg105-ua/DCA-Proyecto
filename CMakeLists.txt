@@ -148,15 +148,29 @@ set(CPACK_PACKAGE_FILE_NAME
     "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}"
 )
 
-# Qué formatos generar
-set(CPACK_GENERATOR "ZIP;TGZ;DEB")
+# Establecer generadores según el sistema operativo
+if(WIN32)
+    set(CPACK_GENERATOR "ZIP;NSIS")
+else()
+    set(CPACK_GENERATOR "ZIP;TGZ;DEB")
+endif()
 
-# --- Configuración específica para DEB ---
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Sector-8")
-set(CPACK_DEBIAN_PACKAGE_SECTION "games")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libstdc++6, libgl1, libx11-6")
+# Configuración específica para DEB
+if(UNIX AND NOT WIN32)
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Sector-8")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "games")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libstdc++6, libgl1, libx11-6")
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+endif()
 
-# El prefijo debe ser /usr para .deb
-set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+# Configuración específica para Windows (NSIS)
+if(WIN32)
+    set(CPACK_NSIS_DISPLAY_NAME "ProjectPrime8")
+    set(CPACK_NSIS_PACKAGE_NAME "ProjectPrime8")
+    set(CPACK_NSIS_MODIFY_PATH OFF)
+    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+    # Por defecto: C:\Program Files\ProjectPrime8
+    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES")
+endif()
 
 include(CPack)
