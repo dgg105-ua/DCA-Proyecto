@@ -167,6 +167,15 @@ void MainGameState::init()
     tutorialVisible = true;
     tutorialFading  = false;
     tutorialTransparencia = 1.0f;
+
+    // Audio: detener otras músicas y comenzar la del juego
+    ResourceManager::instance().stopMusic("MusicaDelMenu");
+    ResourceManager::instance().stopMusic("GameOverMenuMusic");
+    Music &gameMusic = ResourceManager::instance().getMusicByName("MusicLoop");
+    if (IsMusicValid(gameMusic)) {
+        SetMusicVolume(gameMusic, 0.6f);
+        PlayMusicStream(gameMusic);
+    }
 }
 
 void MainGameState::handleInput(){
@@ -405,6 +414,9 @@ void MainGameState::update(float deltaTime)
         }
     }
     //sprites
+
+    // Actualizar música del juego
+    ResourceManager::instance().updateMusic("MusicLoop");
 }
 
 void MainGameState::render()
@@ -991,6 +1003,9 @@ void gestionarSalto(Player& player, float deltaTime, bool& enSuelo) {
         player.canJump = false;
         player.jumpBufferTime = 0;
         player.coyoteTime = 0;
+        // SFX: salto
+        Sound &jump = ResourceManager::instance().getSoundByName("Salto");
+        if (IsSoundValid(jump)) PlaySound(jump);
     }
 
     if (!enSuelo) {
@@ -1014,6 +1029,11 @@ void gestionarLava(float deltaTime, Lava& lava, Player& player,
 
     // Si toca al jugador -> Game Over
     if (CheckCollisionRecs(player.boundingBox, lava.rect)) {
+        // SFX: Game Over
+        Sound &go = ResourceManager::instance().getSoundByName("GameOver");
+        if (IsSoundValid(go)) PlaySound(go);
+        // Detener música del juego
+        ResourceManager::instance().stopMusic("MusicLoop");
         auto gameOver = std::make_unique<GameOverState>();
         gameOver->setStateMachine(state_machine);
         gameOver->setPuntuacion(puntuacion);
@@ -1049,6 +1069,9 @@ void gestionarPowerUp(PowerUp& powerUp, Player& player, float deltaTime, float& 
 
             powerUp.active = false;
             spawnTimer = 0.0f;
+            // SFX: recoger power-up
+            Sound &pu = ResourceManager::instance().getSoundByName("PowerUp");
+            if (IsSoundValid(pu)) PlaySound(pu);
         }
 
         if (powerUp.y > player.y + GetScreenHeight()) {
@@ -1080,6 +1103,9 @@ void gestionarShieldPU(PowerUp& shieldPU, Player& player, float deltaTime, float
             player.vy = -600;
             shieldPU.active = false;
             spawnTimer = 0.0f;
+            // SFX: recoger power-up
+            Sound &pu = ResourceManager::instance().getSoundByName("PowerUp");
+            if (IsSoundValid(pu)) PlaySound(pu);
         }
         if (shieldPU.y > player.y + GetScreenHeight()) {
             shieldPU.active = false;
@@ -1148,6 +1174,9 @@ void gestionarSlowPU(PowerUp& slowPU, Player& player, float deltaTime,
             player.vy   -= 200.0f;
             slowPU.active = false;
             spawnTimer = 0.0f;
+            // SFX: recoger power-up
+            Sound &pu = ResourceManager::instance().getSoundByName("PowerUp");
+            if (IsSoundValid(pu)) PlaySound(pu);
         }
 
         if (slowPU.y > player.y + GetScreenHeight()) {
@@ -1186,6 +1215,9 @@ void gestionarDoublePU(PowerUp& doublePU, Player& player, float deltaTime,
             scoreRateMult  = 2.0f;
             doublePU.active = false;
             spawnTimer = 0.0f;
+            // SFX: recoger power-up
+            Sound &pu = ResourceManager::instance().getSoundByName("PowerUp");
+            if (IsSoundValid(pu)) PlaySound(pu);
         }
 
         if (doublePU.y > player.y + GetScreenHeight()) {

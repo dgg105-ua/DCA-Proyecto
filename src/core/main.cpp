@@ -38,6 +38,10 @@ int main()
     InitWindow(1920, 1080, "DCA Practica Grupal");
     SetTargetFPS(60);
 
+    // Inicializar audio
+    InitAudioDevice();
+    SetMasterVolume(1.0f);
+
     auto mainMenu = std::make_unique<MainMenuState>();
     mainMenu->setStateMachine(&state_machine);
 
@@ -57,6 +61,8 @@ int main()
     }
 
     ResourceManager::instance().unloadAll();
+
+    CloseAudioDevice();
 
     CloseWindow();
 

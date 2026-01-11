@@ -59,12 +59,22 @@ void GameOverState::init()
     };
     //sprites
 
+    // Audio: detener otras músicas y comenzar la del Game Over
+    ResourceManager::instance().stopMusic("MusicaDelMenu");
+    ResourceManager::instance().stopMusic("MusicLoop");
+    Music &goMusic = ResourceManager::instance().getMusicByName("GameOverMenuMusic");
+    if (IsMusicValid(goMusic)) {
+        SetMusicVolume(goMusic, 0.6f);
+        PlayMusicStream(goMusic);
+    }
+
 }
 
 
 void GameOverState::handleInput()
 {
     bool keyboardUsed = false;
+    int prevSelected = selectedOption;
     
     // Keyboard navigation
     if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
@@ -87,7 +97,16 @@ void GameOverState::handleInput()
         }
     }
 
+    if (selectedOption != prevSelected) {
+        Sound &sfx = ResourceManager::instance().getSoundByName("CambiarDeBoton");
+        if (IsSoundValid(sfx)) PlaySound(sfx);
+    }
+
     if (IsKeyPressed(KEY_ENTER)) {
+        {
+            Sound &press = ResourceManager::instance().getSoundByName("OprimirBoton");
+            if (IsSoundValid(press)) PlaySound(press);
+        }
         if (selectedOption == 0) { // Play Again
             auto mainGameState = make_unique<MainGameState>();
             mainGameState->setStateMachine(state_machine);
@@ -105,11 +124,19 @@ void GameOverState::handleInput()
         Vector2 mousePos = GetMousePosition();
         
         if (CheckCollisionPointRec(mousePos, playAgainButton)) {
+            {
+                Sound &press = ResourceManager::instance().getSoundByName("OprimirBoton");
+                if (IsSoundValid(press)) PlaySound(press);
+            }
             auto mainGameState = make_unique<MainGameState>();
             mainGameState->setStateMachine(state_machine);
             state_machine->add_state(move(mainGameState), true);
         }
         else if (CheckCollisionPointRec(mousePos, returnToMenuButton)) {
+            {
+                Sound &press = ResourceManager::instance().getSoundByName("OprimirBoton");
+                if (IsSoundValid(press)) PlaySound(press);
+            }
             auto mainMenuState = make_unique<MainMenuState>();
             mainMenuState->setStateMachine(state_machine);
             state_machine->add_state(move(mainMenuState), true);
@@ -120,6 +147,7 @@ void GameOverState::handleInput()
 void GameOverState::update(float deltaTime)
 {
     // handleInput is already called from main loop
+    ResourceManager::instance().updateMusic("GameOverMenuMusic");
 }
 
 void GameOverState::render()

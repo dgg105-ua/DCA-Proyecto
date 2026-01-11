@@ -66,6 +66,15 @@ void MainMenuState::init()
         exitH
     };
     //sprites
+
+    // Audio: detener cualquier música previa y comenzar la del menú
+    ResourceManager::instance().stopMusic("GameOverMenuMusic");
+    ResourceManager::instance().stopMusic("MusicLoop");
+    Music &menuMusic = ResourceManager::instance().getMusicByName("MusicaDelMenu");
+    if (IsMusicValid(menuMusic)) {
+        SetMusicVolume(menuMusic, 0.6f);
+        PlayMusicStream(menuMusic);
+    }
 }
 
 void MainMenuState::loadBackground()
@@ -76,6 +85,7 @@ void MainMenuState::loadBackground()
 void MainMenuState::handleInput()
 {
     bool keyboardUsed = false;
+    int prevSelected = selectedOption;
     
     // Keyboard navigation
     if (IsKeyPressed(KEY_S)) {
@@ -99,8 +109,17 @@ void MainMenuState::handleInput()
         }
     }
 
+    if (selectedOption != prevSelected) {
+        Sound &sfx = ResourceManager::instance().getSoundByName("CambiarDeBoton");
+        if (IsSoundValid(sfx)) PlaySound(sfx);
+    }
+
     // Selection with Enter key
     if (IsKeyPressed(KEY_ENTER)) {
+        {
+            Sound &press = ResourceManager::instance().getSoundByName("OprimirBoton");
+            if (IsSoundValid(press)) PlaySound(press);
+        }
         if (selectedOption == 0) { // Play
             auto mainGameState = std::make_unique<MainGameState>();
             mainGameState->setStateMachine(state_machine);
@@ -116,11 +135,19 @@ void MainMenuState::handleInput()
         Vector2 mousePos = GetMousePosition();
         
         if (CheckCollisionPointRec(mousePos, playButton)) {
+            {
+                Sound &press = ResourceManager::instance().getSoundByName("OprimirBoton");
+                if (IsSoundValid(press)) PlaySound(press);
+            }
             auto mainGameState = std::make_unique<MainGameState>();
             mainGameState->setStateMachine(state_machine);
             state_machine->add_state(std::move(mainGameState), true);
         }
         else if (CheckCollisionPointRec(mousePos, exitButton)) {
+            {
+                Sound &press = ResourceManager::instance().getSoundByName("OprimirBoton");
+                if (IsSoundValid(press)) PlaySound(press);
+            }
             state_machine->remove_state(true);
         }
     }
@@ -128,6 +155,7 @@ void MainMenuState::handleInput()
 
 void MainMenuState::update(float deltaTime)
 {
+    ResourceManager::instance().updateMusic("MusicaDelMenu");
 }
 
 void MainMenuState::render()
