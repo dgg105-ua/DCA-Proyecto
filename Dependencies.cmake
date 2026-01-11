@@ -6,7 +6,7 @@ if (NOT raylib_FOUND)
 	FetchContent_Declare(
 		raylib
 		GIT_REPOSITORY https://github.com/raysan5/raylib
-		GIT_TAG 5.0
+		GIT_TAG 5.5
 	)
 	
 	set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

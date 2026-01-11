@@ -352,6 +352,7 @@ void MainGameState::update(float deltaTime)
         
         if(ultimoY < ultimoYParedes){
             generarEstructura(estructuras, 0, ultimoYParedes -10000, 80, 10000);
+            generarEstructura(estructuras, GetScreenWidth()-80, ultimoYParedes -10000, 80, 10000);
             ultimoYParedes -= 10000;
         }
     }

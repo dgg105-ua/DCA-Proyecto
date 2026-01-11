@@ -57,12 +57,7 @@ else()
     endif()
 endif()
 
-# ----------------------------------------
-# Raylib
-# Use Dependencies.cmake to try a system raylib first, otherwise fetch/build it
-# via FetchContent. Link the 'raylib' target (created by find_package or
-# FetchContent) rather than hardcoding a vendor static library path.
-# ----------------------------------------
+
 include(${CMAKE_SOURCE_DIR}/Dependencies.cmake)
 
 if (WIN32)
@@ -74,8 +69,7 @@ if (WIN32)
     )
 
 else()
-    # Prefer an installed raylib package; Dependencies.cmake will make a
-    # 'raylib' target available via FetchContent if not found.
+    
     find_package(raylib QUIET)
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -132,11 +126,7 @@ if(NOT WIN32)
     )
 endif()
 
-# ----------------------------------------
-# Uninstall target
-# Avoid name clash with dependencies (e.g., raylib) defining "uninstall".
-# If a target named "uninstall" already exists, create "uninstall_project" instead.
-# ----------------------------------------
+
 if(TARGET uninstall)
     message(STATUS "Target 'uninstall' already exists (from a dependency); defining 'uninstall_project' for this project")
     set(_PP8_UNINSTALL_TARGET uninstall_project)
