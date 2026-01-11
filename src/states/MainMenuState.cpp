@@ -3,7 +3,9 @@
 #include <StateMachine.hpp>
 #include <MainGameState.hpp>
 #include <ResourceManager.hpp>
+#ifndef _WIN32
 #include <libintl.h>
+#endif
 #include <locale.h>
 using namespace std;
 
@@ -11,6 +13,10 @@ extern "C" {
     #include <raylib.h>
 }
 
+
+#ifdef _WIN32
+static inline const char* gettext(const char* s) { return s; }
+#endif
 
 MainMenuState::MainMenuState() : selectedOption(0)
 {
@@ -169,7 +175,7 @@ void MainMenuState::render()
             DrawTexturePro(playButtonTex, srcPlay, dstPlay, Vector2{0.0f, 0.0f}, 0.0f, playTint);
         } else {
             DrawRectangleRec(playButton, (selectedOption == 0) ? GREEN : DARKGREEN);
-            char* playText = gettext("Play");
+            const char* playText = gettext("Play");
             DrawText(playText,
                      playButton.x + (playButton.width - MeasureText(playText, 20)) / 2,
                      playButton.y + (playButton.height - 20) / 2,
@@ -182,7 +188,7 @@ void MainMenuState::render()
             DrawTexturePro(exitButtonTex, srcExit, dstExit, Vector2{0.0f, 0.0f}, 0.0f, exitTint);
         } else {
             DrawRectangleRec(exitButton, (selectedOption == 1) ? RED : MAROON);
-            char* exitText = gettext("Exit");
+            const char* exitText = gettext("Exit");
             DrawText(exitText,
                      exitButton.x + (exitButton.width - MeasureText(exitText, 20)) / 2,
                      exitButton.y + (exitButton.height - 20) / 2,

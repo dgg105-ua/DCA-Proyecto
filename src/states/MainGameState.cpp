@@ -3,8 +3,14 @@
 #include <GameOverState.hpp>
 #include <cmath>
 #include <ResourceManager.hpp>
+#ifndef _WIN32
 #include <libintl.h>
+#endif
 #include <locale.h>
+
+#ifdef _WIN32
+static inline const char* gettext(const char* s) { return s; }
+#endif
 
 MainGameState::MainGameState()
 {

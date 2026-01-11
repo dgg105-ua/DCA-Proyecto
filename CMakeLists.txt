@@ -59,22 +59,13 @@ endif()
 
 # ----------------------------------------
 # Raylib
+# Use Dependencies.cmake to try a system raylib first, otherwise fetch/build it
+# via FetchContent. Link the 'raylib' target (created by find_package or
+# FetchContent) rather than hardcoding a vendor static library path.
 # ----------------------------------------
+include(${CMAKE_SOURCE_DIR}/Dependencies.cmake)
+
 if (WIN32)
-    include(FetchContent)
-
-    FetchContent_Declare(
-        raylib
-        GIT_REPOSITORY https://github.com/raysan5/raylib.git
-        GIT_TAG 5.0
-    )
-
-    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(BUILD_GAMES    OFF CACHE BOOL "" FORCE)
-    set(BUILD_TESTING  OFF CACHE BOOL "" FORCE)
-
-    FetchContent_MakeAvailable(raylib)
-
     target_link_libraries(${PROJECT_NAME} PRIVATE
         raylib
         winmm
@@ -82,9 +73,13 @@ if (WIN32)
         opengl32
     )
 
-elseif (UNIX)
+else()
+    # Prefer an installed raylib package; Dependencies.cmake will make a
+    # 'raylib' target available via FetchContent if not found.
+    find_package(raylib QUIET)
+
     target_link_libraries(${PROJECT_NAME} PRIVATE
-        ${CMAKE_SOURCE_DIR}/vendor/lib/libraylib.a
+        raylib
         GL
         X11
         pthread
@@ -112,26 +107,52 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 # ----------------------------------------
 # Instalación
 # ----------------------------------------
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION bin
-)
-
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
-    DESTINATION share/${PROJECT_NAME}
-)
+if(WIN32)
+    # En Windows: ejecutable y assets juntos en la raíz del paquete
+    install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION .
+    )
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+        DESTINATION .
+    )
+else()
+    # En Linux: estructura estándar FHS
+    install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION bin
+    )
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+        DESTINATION share/${PROJECT_NAME}
+    )
+endif()
 
 # Instalar también las traducciones
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/locale
-    DESTINATION share/${PROJECT_NAME}
-)
+if(NOT WIN32)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/locale
+        DESTINATION share/${PROJECT_NAME}
+    )
+endif()
 
 # ----------------------------------------
-# Uninstall (make uninstall)
+# Uninstall target
+# Avoid name clash with dependencies (e.g., raylib) defining "uninstall".
+# If a target named "uninstall" already exists, create "uninstall_project" instead.
 # ----------------------------------------
-add_custom_target(uninstall
-    COMMAND /usr/bin/sudo rm -rf ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
-    COMMAND /usr/bin/sudo rm -f ${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}
-    COMMENT "Removing ${PROJECT_NAME} from ${CMAKE_INSTALL_PREFIX} (may ask for sudo password)"
+if(TARGET uninstall)
+    message(STATUS "Target 'uninstall' already exists (from a dependency); defining 'uninstall_project' for this project")
+    set(_PP8_UNINSTALL_TARGET uninstall_project)
+else()
+    set(_PP8_UNINSTALL_TARGET uninstall)
+endif()
+
+set(_PP8_BINARY_NAME "${PROJECT_NAME}")
+if(WIN32)
+    set(_PP8_BINARY_NAME "${PROJECT_NAME}.exe")
+endif()
+
+add_custom_target(${_PP8_UNINSTALL_TARGET}
+    COMMAND ${CMAKE_COMMAND} -E remove -f "${CMAKE_INSTALL_PREFIX}/bin/${_PP8_BINARY_NAME}"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}"
+    COMMENT "Removing ${PROJECT_NAME} from ${CMAKE_INSTALL_PREFIX}"
 )
 
 # ----------------------------------------

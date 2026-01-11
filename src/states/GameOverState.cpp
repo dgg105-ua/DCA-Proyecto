@@ -4,7 +4,9 @@
 #include <MainMenuState.hpp>
 #include <StateMachine.hpp>
 #include <ResourceManager.hpp>
+#ifndef _WIN32
 #include <libintl.h>
+#endif
 #include <locale.h>
 using namespace std;
 
@@ -12,6 +14,10 @@ extern "C" {
     #include <raylib.h>
 }
 
+
+#ifdef _WIN32
+static inline const char* gettext(const char* s) { return s; }
+#endif
 
 
 GameOverState::GameOverState() : selectedOption(0)
