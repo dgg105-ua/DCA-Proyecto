@@ -4,7 +4,9 @@
 #include <memory>
 #include <chrono>
 #include <ResourceManager.hpp>
+#ifndef _WIN32
 #include <libintl.h>
+#endif
 #include <locale.h>
 
 extern "C" {
@@ -14,12 +16,19 @@ extern "C" {
 const char* PACKAGE = "ProjectPrime8";
 const char * LOCALEDIR = "./locale";
 
+// Fallback gettext for Windows (no translations)
+#ifdef _WIN32
+static inline const char* gettext(const char* s) { return s; }
+#endif
+
 int main()
 { 
+#ifndef _WIN32
     setlocale(LC_ALL, "");
-	bindtextdomain(PACKAGE, LOCALEDIR); // Para buscar las traducciones en la carpeta LOCALEDIR
+    bindtextdomain(PACKAGE, LOCALEDIR);
     bind_textdomain_codeset(PACKAGE, "UTF-8");
-	textdomain(PACKAGE);
+    textdomain(PACKAGE);
+#endif
 
     float delta_time = 0.0f;
 

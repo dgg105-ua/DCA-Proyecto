@@ -62,24 +62,10 @@ else()
     endif()
 endif()
 
-# ----------------------------------------
-# Raylib
-# ----------------------------------------
+
+include(${CMAKE_SOURCE_DIR}/Dependencies.cmake)
+
 if (WIN32)
-    include(FetchContent)
-
-    FetchContent_Declare(
-        raylib
-        GIT_REPOSITORY https://github.com/raysan5/raylib.git
-        GIT_TAG 5.0
-    )
-
-    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(BUILD_GAMES    OFF CACHE BOOL "" FORCE)
-    set(BUILD_TESTING  OFF CACHE BOOL "" FORCE)
-
-    FetchContent_MakeAvailable(raylib)
-
     target_link_libraries(${PROJECT_NAME} PRIVATE
         raylib
         winmm
@@ -87,9 +73,12 @@ if (WIN32)
         opengl32
     )
 
-elseif (UNIX)
+else()
+    
+    find_package(raylib QUIET)
+
     target_link_libraries(${PROJECT_NAME} PRIVATE
-        ${CMAKE_SOURCE_DIR}/vendor/lib/libraylib.a
+        raylib
         GL
         X11
         pthread
@@ -126,24 +115,87 @@ endif()
 # ----------------------------------------
 # Instalaciónz
 # ----------------------------------------
-install(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION bin
-)
-
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
-    DESTINATION share/${PROJECT_NAME}
-)
+if(WIN32)
+    # En Windows: ejecutable y assets juntos en la raíz del paquete
+    install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION .
+    )
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+        DESTINATION .
+    )
+else()
+    # En Linux: estructura estándar FHS
+    install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION bin
+    )
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+        DESTINATION share/${PROJECT_NAME}
+    )
+endif()
 
 # Instalar también las traducciones
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/locale
-    DESTINATION share/${PROJECT_NAME}
+if(NOT WIN32)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/locale
+        DESTINATION share/${PROJECT_NAME}
+    )
+endif()
+
+
+if(TARGET uninstall)
+    message(STATUS "Target 'uninstall' already exists (from a dependency); defining 'uninstall_project' for this project")
+    set(_PP8_UNINSTALL_TARGET uninstall_project)
+else()
+    set(_PP8_UNINSTALL_TARGET uninstall)
+endif()
+
+set(_PP8_BINARY_NAME "${PROJECT_NAME}")
+if(WIN32)
+    set(_PP8_BINARY_NAME "${PROJECT_NAME}.exe")
+endif()
+
+add_custom_target(${_PP8_UNINSTALL_TARGET}
+    COMMAND ${CMAKE_COMMAND} -E remove -f "${CMAKE_INSTALL_PREFIX}/bin/${_PP8_BINARY_NAME}"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}"
+    COMMENT "Removing ${PROJECT_NAME} from ${CMAKE_INSTALL_PREFIX}"
 )
 
 # ----------------------------------------
-# Uninstall (make uninstall)
+# CPack (Packaging)
 # ----------------------------------------
-add_custom_target(uninstall
-    COMMAND /usr/bin/sudo rm -rf ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}
-    COMMAND /usr/bin/sudo rm -f ${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}
-    COMMENT "Removing ${PROJECT_NAME} from ${CMAKE_INSTALL_PREFIX} (may ask for sudo password)"
+
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_VENDOR "ProjectPrime8")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Videojuego Project Prime-8")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+
+# Nombre del archivo generado
+set(CPACK_PACKAGE_FILE_NAME
+    "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}"
 )
+
+# Establecer generadores según el sistema operativo
+if(WIN32)
+    set(CPACK_GENERATOR "ZIP;NSIS")
+else()
+    set(CPACK_GENERATOR "ZIP;TGZ;DEB")
+endif()
+
+# Configuración específica para DEB
+if(UNIX AND NOT WIN32)
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Sector-8")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "games")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libstdc++6, libgl1, libx11-6")
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+endif()
+
+# Configuración específica para Windows (NSIS)
+if(WIN32)
+    set(CPACK_NSIS_DISPLAY_NAME "ProjectPrime8")
+    set(CPACK_NSIS_PACKAGE_NAME "ProjectPrime8")
+    set(CPACK_NSIS_MODIFY_PATH OFF)
+    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+    # Por defecto: C:\Program Files\ProjectPrime8
+    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES")
+endif()
+
+include(CPack)

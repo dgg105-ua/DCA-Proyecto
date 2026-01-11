@@ -3,9 +3,15 @@
 #include <GameOverState.hpp>
 #include <cmath>
 #include <ResourceManager.hpp>
+#ifndef _WIN32
 #include <libintl.h>
+#endif
 #include <locale.h>
 #include <GameLogic.hpp>
+
+#ifdef _WIN32
+static inline const char* gettext(const char* s) { return s; }
+#endif
 
 MainGameState::MainGameState()
 {
@@ -347,6 +353,7 @@ void MainGameState::update(float deltaTime)
         
         if(ultimoY < ultimoYParedes){
             generarEstructura(estructuras, 0, ultimoYParedes -10000, 80, 10000);
+            generarEstructura(estructuras, GetScreenWidth()-80, ultimoYParedes -10000, 80, 10000);
             ultimoYParedes -= 10000;
         }
     }

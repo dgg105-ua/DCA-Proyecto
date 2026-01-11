@@ -1,16 +1,23 @@
+
 include(FetchContent)
 
-find_package(raylib)
+# Try to find an installed raylib package quietly. If not found we will
+# fetch and build raylib via FetchContent below. Using QUIET avoids printing
+# a warning when raylib isn't installed (it's expected in many dev setups).
+find_package(raylib QUIET)
 
 if (NOT raylib_FOUND)
 	FetchContent_Declare(
 		raylib
 		GIT_REPOSITORY https://github.com/raysan5/raylib
-		GIT_TAG 5.0
+		GIT_TAG 5.5
 	)
 	
 	set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 	set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
+
+	# Inform the user that raylib will be fetched/built (can take some time)
+	message(STATUS "Instalando/descargando y construyendo raylib (esto puede tardar varios minutos)...")
 
 	FetchContent_MakeAvailable(raylib)	
 	
