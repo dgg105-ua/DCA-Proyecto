@@ -23,6 +23,11 @@ file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/src/*.cpp
 )
 
+list(REMOVE_ITEM SOURCES
+    ${CMAKE_SOURCE_DIR}/src/core/GameLogic.cpp
+    ${CMAKE_SOURCE_DIR}/src/core/GameLogicLava.cpp
+)
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # ----------------------------------------
@@ -110,7 +115,16 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 )
 
 # ----------------------------------------
-# Instalación
+# Testing
+# ----------------------------------------
+include(CTest)
+
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
+
+# ----------------------------------------
+# Instalaciónz
 # ----------------------------------------
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION bin

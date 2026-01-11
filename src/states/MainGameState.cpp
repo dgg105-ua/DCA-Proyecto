@@ -5,6 +5,7 @@
 #include <ResourceManager.hpp>
 #include <libintl.h>
 #include <locale.h>
+#include <GameLogic.hpp>
 
 MainGameState::MainGameState()
 {
