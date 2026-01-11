@@ -1,50 +1,27 @@
-# ----------------------------------------
-# Tests (CTest)
-# ----------------------------------------
-
-# ----------------------------------------
-# C++
-# ----------------------------------------
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# ----------------------------------------
-# Ejecutable de tests
-# ----------------------------------------
-add_executable(ProjectPrime8_tests
-    prime8_tests.cpp
+add_executable(ProjectPrime8_gameplay_tests
+  gameplay_runner.cpp
+  raylib_stubs.cpp
+  ${CMAKE_SOURCE_DIR}/src/core/GameLogic.cpp
 )
 
-# ----------------------------------------
-# Ruta del proyecto (para localizar assets)
-# ----------------------------------------
-target_compile_definitions(ProjectPrime8_tests PRIVATE
-    PROJECT_ROOT="${CMAKE_SOURCE_DIR}"
+target_compile_features(ProjectPrime8_gameplay_tests PRIVATE cxx_std_17)
+
+target_include_directories(ProjectPrime8_gameplay_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_SOURCE_DIR}/vendor/include
 )
 
-# ----------------------------------------
-# Registrar tests en CTest
-# ----------------------------------------
-function(add_boost_case test_name boost_filter)
-    add_test(
-        NAME ${test_name}
-        COMMAND ProjectPrime8_tests --run_test=${boost_filter}
-    )
-endfunction()
+if (UNIX AND NOT APPLE)
+  target_link_libraries(ProjectPrime8_gameplay_tests PRIVATE m)
+endif()
 
-# ----------------------------------------
-# Suite de tests
-# ----------------------------------------
-
-add_boost_case(assets_background_exists   Assets/background_exists)
-add_boost_case(assets_floor_exists        Assets/floor_exists)
-add_boost_case(assets_platform_exists     Assets/platform_exists)
-add_boost_case(assets_lava_exists         Assets/lava_exists)
-add_boost_case(assets_wallizq_exists      Assets/wallizq_exists)
-add_boost_case(assets_wallder_exists      Assets/wallder_exists)
-add_boost_case(assets_font_exists         Assets/font_exists)
-add_boost_case(png_background_signature   PngValidity/background_png_signature)
-add_boost_case(png_platform_signature     PngValidity/platform_png_signature)
-add_boost_case(locale_es_mo_exists        Locales/es_mo_exists)
-add_boost_case(locale_de_mo_exists        Locales/de_mo_exists)
-add_boost_case(locale_fr_mo_exists        Locales/fr_mo_exists)
+add_test(NAME gameplay_collision_ground               COMMAND ProjectPrime8_gameplay_tests --run collision_ground)
+add_test(NAME gameplay_collision_wall_push            COMMAND ProjectPrime8_gameplay_tests --run collision_wall_push)
+add_test(NAME gameplay_gravity_moves_down             COMMAND ProjectPrime8_gameplay_tests --run gravity_moves_down)
+add_test(NAME gameplay_jump_buffer_triggers           COMMAND ProjectPrime8_gameplay_tests --run jump_buffer_triggers)
+add_test(NAME gameplay_jump_cut_when_space_held       COMMAND ProjectPrime8_gameplay_tests --run jump_cut_when_space_held)
+add_test(NAME gameplay_powerup_spawn_by_timer         COMMAND ProjectPrime8_gameplay_tests --run powerup_spawn_by_timer)
+add_test(NAME gameplay_powerup_pickup_jump            COMMAND ProjectPrime8_gameplay_tests --run powerup_pickup_jump)
+add_test(NAME gameplay_shield_pickup_sets_flag        COMMAND ProjectPrime8_gameplay_tests --run shield_pickup_sets_flag)
+add_test(NAME gameplay_slow_pickup_sets_timescale     COMMAND ProjectPrime8_gameplay_tests --run slow_pickup_sets_timescale)
+add_test(NAME gameplay_double_pickup_sets_multiplier  COMMAND ProjectPrime8_gameplay_tests --run double_pickup_sets_multiplier)
