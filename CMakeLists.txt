@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
-project(ProjectPrime8 VERSION 0.1.0 LANGUAGES CXX)
+project(ProjectPrime8 VERSION 1.0.0 LANGUAGES CXX)
 
 # ----------------------------------------
 # Prefijo de instalación (Linux)
